@@ -49,3 +49,18 @@ Pygame uses these PNGs at runtime; Pillow is not a gameplay dependency.
    distinct authored walk, blink, or celebration frames.
 4. Collect actual player feedback. This is a targeted art-direction revision,
    **not** a claim of studio-quality finished animation.
+
+## v0.4 — Soft Cub Pass (provisional candidate)
+
+**User feedback:** v0.3 still wasn't cute enough. Baby-cub appeal needs to be visible at the size used in *actual screens*, not only in zoomed portraits. This is the next proposal, not a locked art direction.
+
+- Replaced the three main-cub PNGs with a consistent authored pixel construction (`tools/generate_cute_cubs.py`). The cheeks and eyes are larger, muzzles shorter, paws rounder and bodies smaller relative to the head. All three cubs now have separate idle, blink, cheer and sad frames, 12 total PNGs.
+- The player's spotted red kerchief, Bruno's folded ear and blue bandana, and Daisy's flower, violet scarf and clasped paws preserve recognizability even when scaled down.
+- `_sprite` chooses idle-blink frames without disturbing game state, and supports an explicit cheer/sad expression in presentations/results. Reduced-motion disables idle blinking and bobbing.
+- The **actual Pygame craft screen** now displays the player cub alongside the pie, with situational speech such as “Squish squish!” or “I DID THAT!” This illustration has no click hitbox and doesn't intercept crafting input.
+- Generated static PNG layout previews for crafting and title are **not** a claim of captured Pygame gameplay. They are composed from the exact same runtime PNG assets.
+- Build-time assets remain deterministic, open to manual refinement and editable in Python. No image-generator proof-of-concept collage was shipped, and no paid/image-API dependency exists.
+- Judges still use v0.3 portraits. Environments and the basic utility UI remain more utilitarian than the main cubs; polish, walk cycles, actual Windows screenshot QA and the two-hour playtime gate are unfinished.
+
+**Regeneration:** after installing Pillow *only for art development*, run
+`python tools/generate_art.py` from the project root. It first draws the base backgrounds and judges and then installs the v0.4 main cub sprites and expressions.
