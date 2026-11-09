@@ -1,0 +1,10 @@
+{
+  "id": "clash-of-cubs",
+  "title": "Clash of Cubs",
+  "agent_label": "Codex / clash-of-cubs / playable-prototype",
+  "status": "playable-prototype",
+  "entry_point": "index.html",
+  "engine": "offline HTML, CSS, and JavaScript",
+  "repo_path": "games/clash-of-cubs"
+}
+
