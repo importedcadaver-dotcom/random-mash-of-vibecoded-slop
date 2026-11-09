@@ -194,7 +194,7 @@ def test_weather_and_chapter_overlay_draw(app):
     app.scene='craft'
     app.draw()
     drag(app,(62,404),(660,550))
-    assert app.pie.layers[0].wetness>.55
+    assert app.pie.layers[0].wetness==pytest.approx(.55)  # .42 base + .13 rainy-weather bonus
     app.mouse=(660,550)
     old=app.pie.layers[0].wetness
     app.dry_layer()
