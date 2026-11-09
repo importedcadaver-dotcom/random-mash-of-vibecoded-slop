@@ -5,7 +5,7 @@ Checks were performed on 2026-11-08 in the current Windows environment.
 | Tool | Finding | What was verified |
 |---|---|---|
 | Godot | Not found as a runnable Godot executable | `godot`/`godot4` were not available in PATH or common install folders. `godot-ai.exe` alone did not provide a game engine runtime. |
-| Node.js | Available | Node v24.19.0 ran the project verification harness and executed a short background HTTP server smoke check. |
+| Node.js | Available | Node v24.19.0 parsed and ran the expanded verification harness and started a short background HTTP server smoke check. The preview server starts; a browser fetch to its local port was denied by the environment. |
 | Aseprite | Installed | Aseprite 1.3.18.3-dev returned version and help output. Its batch import rejected SVG input, so no Aseprite asset pipeline was used. |
 | Python | Launch failed | Python launch shims were present, but the selected runtime failed to spawn its child interpreter. |
 | Krita | Installed | App folder detected; its background workflow was not exercised. |
@@ -16,11 +16,12 @@ Checks were performed on 2026-11-08 in the current Windows environment.
 
 ## Game verification
 
-`node verify.js` passed. The local harness parses and executes the game's real JavaScript with a mock DOM and covers:
+`node verify.js` passed for the base-builder expansion. The local harness parses and executes the game's real JavaScript with a mock DOM and covers:
 
-- building upgrades, training, raid rewards, survivor return, day progression, and night defense
-- the non-graphic cub-loss scene, emotional response, and saved casualty
+- building placement and upgrades, resource caps and production, all five unit types, squad selection, save and reload, raid rewards, survivor return, and home defense
+- two rival wins and the third rival's unlock
 - climber bypass, screecher stun, tunnel breach, and sleepy-cub timing
+- the advanced-guard loss scene, emotional response, and saved casualty
 - no external network dependency in the game source
 
 The browser's visual layout and real input behavior still need a browser playthrough because the browser policy prevented local-page access in this session.

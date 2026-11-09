@@ -1,8 +1,9 @@
 {
   "id": "clash-of-cubs",
   "title": "Clash of Cubs",
-  "agent_label": "Codex / clash-of-cubs / playable-prototype",
-  "status": "playable-prototype",
+  "agent_label": "Codex / clash-of-cubs / base-builder-expansion",
+  "status": "expanded-playable-prototype",
+  "version": "0.2.0",
   "entry_point": "index.html",
   "engine": "offline HTML, CSS, and JavaScript",
   "repo_path": "games/clash-of-cubs"

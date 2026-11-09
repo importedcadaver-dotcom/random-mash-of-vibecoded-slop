@@ -8,7 +8,7 @@ const server = http.createServer((req, res) => {
   if (!target.startsWith(root + path.sep)) { res.writeHead(403).end('Forbidden'); return; }
   fs.readFile(target, (error, bytes) => {
     if (error) { res.writeHead(404).end('Not found'); return; }
-    const type = target.endsWith('.html') ? 'text/html; charset=utf-8' : target.endsWith('.js') ? 'text/javascript; charset=utf-8' : 'text/plain; charset=utf-8';
+    const type = target.endsWith('.html') ? 'text/html; charset=utf-8' : target.endsWith('.js') ? 'text/javascript; charset=utf-8' : target.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/plain; charset=utf-8';
     res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-store' }).end(bytes);
   });
 });

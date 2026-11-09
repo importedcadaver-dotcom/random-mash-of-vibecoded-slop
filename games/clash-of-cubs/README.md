@@ -1,42 +1,44 @@
-# Clash of Cubs — playable prototype
+# Clash of Cubs — base-builder prototype
 
-**Project label:** `Codex / clash-of-cubs / playable-prototype`  
+**Work label:** `Codex / clash-of-cubs / base-builder-expansion`  
 **Repository:** [`importedcadaver-dotcom/random-mash-of-vibecoded-slop`](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop)  
-**Repository path:** `games/clash-of-cubs/`
+**Project folder:** `games/clash-of-cubs/`  
+**Branch:** `agent/clash-of-cubs/base-builder-expansion`
 
-An offline, single-player strategy prototype set in Mosswood Valley. It runs in a modern desktop or mobile browser and stores progress in that browser's local storage.
+An original, offline, single-player den-building and raiding prototype set in Mosswood Valley. It runs in a modern desktop or mobile browser, uses original CSS and Unicode art, and saves progress in that browser.
 
 ## Run it
 
-Open `index.html` in a browser. No server, engine installation, account, network connection, or external asset is required. For a temporary local preview server from this folder, run:
+Open `index.html` in a browser. No installation, account, network connection, or external assets are required.
 
-```powershell
-node preview-server.js
-```
-
-Then open `http://127.0.0.1:4173`. Press Ctrl+C in the terminal to stop the preview server. Run `node verify.js` to check the main gameplay routes.
+For a local preview server, run `node preview-server.js` from this folder and open `http://127.0.0.1:4173`. Run `node verify.js` to check the main gameplay routes.
 
 ## Play
 
-- Tap a den building to upgrade it. The Nursery raises the number of cubs your den can house; the Honey Pantry and Log Wall reduce losses on unattended nights.
-- Train Roller, Climber, Screecher, Tunnel, and Sleepy cubs from **Train cubs**.
-- Scout Maple-Moon Outpost, pick a cub, tap a building or guard, then send the cub.
-- Roller cubs hit walls hard, Climbers bypass them, Tunnel cubs burrow underneath, Screechers briefly distract the guard, and Sleepy cubs hit harder after their first turn.
-- Clear two outpost targets to bring back raid supplies. Survivors return to your roster. **End day** triggers a small scripted night raid against your stash.
-- Progress saves automatically in the browser. Clear local storage for this site to start over.
+- **Build:** Open Build, select a blueprint, then tap an empty plot in your den. Tap a placed building to inspect and upgrade it. Each resource has a visible storage cap.
+- **Gather:** Honey hives, berry patches, fish ponds, toy workshops, and timber mills produce supplies when you end the day. Supply burrows increase storage capacity.
+- **Train:** Recruit Roller, Climber, Screecher, Tunnel, and Sleepy cubs. Use plus and minus to choose your expedition squad; the Nursery and Training Grove upgrades raise their capacities.
+- **Raid:** Scout Maple-Moon Outpost first. Clear two loot spots to earn a full haul and unlock another rival. Survivors return to the den. Retreat early to keep part of the loot.
+- **Defend:** End the day to resolve a scripted home raid, calculate protection from walls, lookouts, and traps, gather production, and advance the day.
+- **Bear Book:** Review cub abilities and dialogue, rival wins, and any cubs lost in dangerous expeditions.
 
-Raids are staged as storybook conflicts. A scripted rare loss scene represents a cub's death without depicting injury or gore; the remaining cubs react with fear and grief, and the roster records that permanent loss.
+## Specialist abilities
 
-## Decisions and limits
+- Roller cubs deal heavy damage to walls.
+- Climbers bypass active walls and guards to reach loot.
+- Screechers stun an active lookout for a turn.
+- Tunnel cubs burrow through walls or emerge under structures.
+- Sleepy cubs start with a small attack. Wake one before deployment to charge a stronger move.
 
-- Godot was not available as a runnable engine in this environment, so the prototype uses browser-native HTML, CSS, and JavaScript. That keeps the game offline and launchable without installing software.
-- The rival is a fixed scripted outpost. There is no online play, backend, build timer, account, purchase, or publishing flow.
-- The den has a compact upgrade loop. Some listed resources (fish, timber, toys) appear as raid and training supplies; detailed production chains are outside this slice.
-- Visuals use original CSS, Unicode icons, and browser fonts. No existing game or bear-project assets are included.
-- This is a prototype, not a full mobile-base strategy game. The outpost can be replayed, and upgrades carry into later days.
+Advanced rival guards can cause permanent cub losses. Loss scenes show the litter's fear and grief without graphic injury or gore.
 
-## Tool checks
+## Save and verification
 
-See `tool-checks.md` for what was actually available and tested during this build.
+The game stores a versioned save in browser local storage and migrates basic progress from the earlier prototype save. Clear this site's local storage to start over.
 
+`node verify.js` uses a local mock DOM to exercise building placement and upgrades, training, squad assignment, saving and reload, two successful rival raids, specialist abilities, loot, nighttime production, home defense, and an advanced guard-loss scene. Browser rendering and real pointer input still need a manual playthrough; the in-session browser policy blocked local-page previewing.
+
+## Scope
+
+Rival dens are scripted and replayable. There are no accounts, online battles, purchases, timers, server, or publishing flow. This is a compact prototype; it does not include a full-time multiplayer ecosystem or production-ready art pipeline.
 
