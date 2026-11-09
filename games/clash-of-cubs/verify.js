@@ -7,17 +7,7 @@ const start = html.indexOf('<script>') + '<script>'.length;
 const end = html.indexOf('</script>', start);
 assert.ok(start >= 8 && end > start, 'inline game script exists');
 const source = html.slice(start, end);
-try { new Function(source); }
-catch (error) {
-  try { new Function(source.replace(/\}\)\(\);\s*$/, '')); console.error('removing IIFE close makes syntax valid'); } catch (e) { console.error('IIFE close removal:', e.message); }
-  source.split(/\r?\n/).forEach((line, i) => { if (line.includes('function ')) { try { new Function(line); } catch (e) { if (!e.message.includes('Unexpected end')) console.error(`function line ${i + 1}: ${e.message}`); } } });
-  const cuts = [...source.matchAll(/\nfunction /g)].map(m => m.index);
-  for (const [index, cut] of cuts.entries()) {
-    try { new Function(`${source.slice(0, cut)}\n})();`); }
-    catch (prefixError) { if (prefixError.message.includes('Unexpected token')) { console.error(`unexpected token before function ${index + 1}: ${prefixError.message}`); break; } }
-  }
-  throw error;
-}
+new Function(source);
 assert.equal(html.includes('https://'), false, 'game does not depend on external network resources');
 
 class Element {
