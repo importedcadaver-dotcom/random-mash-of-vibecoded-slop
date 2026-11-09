@@ -1,0 +1,46 @@
+name: Mud Pie Masters (Windows + Linux)
+on:
+  pull_request:
+    paths:
+      - 'games/mud-pie-masters/**'
+      - '.github/workflows/mud-pie-masters-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'games/mud-pie-masters/**'
+      - '.github/workflows/mud-pie-masters-ci.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    name: Py3.12 / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    defaults:
+      run:
+        working-directory: games/mud-pie-masters
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require full source import
+        shell: bash
+        run: |
+          test -f main.py || { echo 'Mud Pie Masters source not imported yet'; exit 1; }
+          test -d assets && test -d tests && test -d mudpie
+      - name: Install
+        run: python -m pip install -r requirements-dev.txt
+      - name: Logic and headless Pygame tests
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: python -m pytest -q
+      - name: Campaign simulation
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: python tools/simulate_campaign.py
