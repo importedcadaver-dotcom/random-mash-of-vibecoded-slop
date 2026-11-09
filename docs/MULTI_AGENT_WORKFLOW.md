@@ -24,7 +24,7 @@ Set-Location ..\work-mudpie\games\mud-pie-masters
 When two agents must modify `mudpie/game.py`, coordinate the second agent via PR/issue first. Avoid blind merges. Prefer split modules and unit tests to improve parallelism.
 
 ## Importing new games
-Never unpack a game's ZIP at repository root, never overwrite `games/<other-game>/`. Use a per-game folder. The `tools/import-local-game.ps1` helper is intentionally limited to Mud Pie Masters' v0.5 ZIP. Other games should get their own importer and game-specific checks.
+Never unpack a game's ZIP at repository root, never overwrite `games/<other-game>/`. Use a per-game folder. Mud Pie Masters v0.5 was imported directly as individual Git files, with its original PNG/WAV assets; keep future games isolated to their own folder. Avoid leaving one-game-only importer utilities in shared root indefinitely.
 
 ## Release gate
 Each game defines its own acceptance tests. Mud Pie Masters remains an unverified two-hour pre-release; Windows interactive playtesting is outstanding. Keep honest release labels in the catalog and PR.

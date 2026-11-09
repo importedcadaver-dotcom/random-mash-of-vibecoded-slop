@@ -4,7 +4,7 @@
   "engine": "Python 3.12 / pygame-ce",
   "platform": ["Windows"],
   "version": "0.5.0",
-  "status": "source-import-pending",
+  "status": "source-imported",
   "release_status": "pre-release-candidate",
   "offline": true,
   "paid_dependencies": false,

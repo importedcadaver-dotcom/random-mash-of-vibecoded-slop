@@ -32,4 +32,4 @@ Use a **new unique branch and worktree for each task**. Prefer module-specific s
 Run `python -m pytest -q` and `python tools/simulate_campaign.py` from this game folder after import. Include Windows SDL/Pygame smoke tests. Historical 116 pure-Python tests passed during v0.5 construction; do not present these as new GitHub CI results.
 
 ## Import status
-The game source ZIP and PNG/WAV assets must be imported as **real editable files**, not just linked. Until `main.py`, `mudpie/`, `tests/` and `assets/` are present, this repo directory contains documentation, not the complete game. Use `tools/import-local-game.ps1` in repo root to import the verified v0.5 ZIP from the user's Windows computer and push on this dedicated branch.
+**Source imported.** All 76 source-archive files, including `main.py`, `mudpie/`, `tests/`, `assets/`, and Windows scripts, are present as individual Git objects on the import branch. The project remains an unverified pre-release until real Windows/Pygame and two-hour human testing. See `IMPORT_VERIFICATION.md`.
