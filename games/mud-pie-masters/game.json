@@ -1,0 +1,16 @@
+{
+  "id": "mud-pie-masters",
+  "name": "Mud Pie Masters",
+  "engine": "Python 3.12 / pygame-ce",
+  "platform": ["Windows"],
+  "version": "0.5.0",
+  "status": "source-imported",
+  "release_status": "pre-release-candidate",
+  "offline": true,
+  "paid_dependencies": false,
+  "gameplay_hours_goal": 2,
+  "gameplay_hours_verified": false,
+  "agent_contribution": "ChatGPT GPT-6 / mud-pie-masters / import-v0.5",
+  "primary_entrypoint": "main.py",
+  "test_command": "python -m pytest -q"
+}

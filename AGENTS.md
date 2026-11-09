@@ -6,8 +6,8 @@ This repository contains separate AI-assisted game projects. Read this file and 
 
 Every workstream uses a clear label in its commit or pull request title:
 
-- Format: `Codex / <game-id> / <short-task>`
-- Current game: `Codex / clash-of-cubs / playable-prototype`
+- Format: `<agent or model> / <game-id> / <short-task>`; examples: `Codex / clash-of-cubs / playable-prototype`, `ChatGPT GPT-6 / mud-pie-masters / import-v0.5`
+- Workstreams: `Codex / clash-of-cubs / playable-prototype` and `ChatGPT GPT-6 / mud-pie-masters / import-v0.5`. These are labels, not separate authenticated GitHub user accounts.
 
 ## Parallel work
 

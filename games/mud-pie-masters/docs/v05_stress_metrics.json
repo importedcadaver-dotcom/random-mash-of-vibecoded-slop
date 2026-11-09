@@ -1,0 +1,47 @@
+{
+  "total_contests": 48,
+  "unchanged_template_goal_completions": 12,
+  "unchanged_template_goal_completions_ids": [
+    "story-01-04",
+    "story-01-06",
+    "story-02-02",
+    "story-02-06",
+    "story-03-01",
+    "story-03-06",
+    "story-04-04",
+    "story-04-06",
+    "story-05-04",
+    "side-01-02",
+    "side-04-01",
+    "side-06-02"
+  ],
+  "scoring_wins_without_legal_mission_check": {
+    "architect": 11,
+    "florist": 21,
+    "precision": 27,
+    "unchanged_template": 0
+  },
+  "strategy_focus_scores": {
+    "architect": {
+      "Size": 77.7,
+      "Decoration": 53.1,
+      "Symmetry": 40.0
+    },
+    "florist": {
+      "Size": 53.9,
+      "Decoration": 75.3,
+      "Symmetry": 40.5
+    },
+    "precision": {
+      "Size": 59.2,
+      "Decoration": 74.6,
+      "Symmetry": 91.1
+    },
+    "unchanged_template": {
+      "Size": 77.7,
+      "Decoration": 74.7,
+      "Symmetry": 43.0
+    }
+  },
+  "caution": "Data-model comparisons only. No mouse interaction, graphical rendering, realistic human strategy, subjective fun, or duration measured."
+}
