@@ -149,3 +149,34 @@ def test_new_scoop_is_deferred_while_an_older_tier_is_falling(game):
     finish_fall(game)
     gesture(game,(65,405),(655,508))
     assert len(game.pie.layers)==3
+
+
+def test_mid_fall_reposition_is_rechecked_after_last_tier_lands(game):
+    """An edit during a fall must not strand another unsupported floating tier."""
+    base=game.pie.add_layer(0)
+    lower=game.pie.add_layer(0)
+    upper=game.pie.add_layer(170)
+    game.settle_pie_support()
+    assert upper.fallen and game.fall_animations
+    # The second standing tier loses contact while the first drop is animating.
+    lower.x = 170
+    assert game.settle_pie_support() == []  # Deferred during animation.
+    assert not lower.fallen
+    finish_fall(game)
+    assert lower.fallen
+    assert not game.fall_animations
+
+
+def test_falling_snapshot_is_after_actual_gravity_displacement(game):
+    """The QA screenshot must depict movement rather than frame-zero hovering."""
+    game.pie.add_layer(0)
+    game.pie.add_layer(160)
+    game.settle_pie_support()
+    assert game.fall_animations
+    anim=game.fall_animations[0]
+    assert anim['elapsed'] == 0
+    for _ in range(8):
+        game.step_frame(1/60)
+    assert 0 < anim['elapsed'] < anim['duration']
+    t=anim['elapsed']/anim['duration']
+    assert (TABLE_Y-anim['origin']) * t*t > 0
