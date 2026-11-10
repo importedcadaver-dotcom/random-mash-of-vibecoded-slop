@@ -94,10 +94,35 @@ def execute(output: Path) -> dict:
         game.scene = "title"
         game.draw()
         bot.capture("post_campaign_title")
-        game.begin_round()
-        bot.require(game.scene == "campaign", "Post-campaign replay/map entry failed")
+        # Verify the actual "continue" control leads to the final family scene.
+        bot.click(190, 480)
+        bot.require(game.scene == "epilogue", "Completed story cannot open its finale")
+        game.draw()
+        bot.capture("completed_forest_finale")
+        # The finale's chapter-map link must remain functional.
+        bot.click(310, 617)
+        bot.require(game.scene == "campaign", "Finale cannot open the chapter map")
         game.draw()
         bot.capture("completed_campaign_map")
+        # 48 original entries require multiple saved scrapbook pages.
+        game.scene = "gallery"
+        game.draw()
+        bot.capture("scrapbook_after_48_rounds")
+        bot.click(920, 46)
+        bot.require(game.gallery_page == 1, "Scrapbook next page is broken")
+        game.draw()
+        bot.capture("scrapbook_second_page")
+        # A fresh Game must recover progress, family and history after restart.
+        from mudpie.game import Game
+        restored = Game(game.display)
+        bot.require(restored.round_no == 49, "Restart lost round number")
+        bot.require(restored.campaign["next_story"] == 36, "Restart lost story ending")
+        bot.require(len(restored.history) == 48, "Restart lost contest history")
+        bot.require(len(restored.gallery) == 48, "Restart lost scrapbook")
+        bot.require(len(restored.rivals) == 2, "Restart lost sibling state")
+        restored.scene = "title"
+        restored.draw()
+        bot.capture("restarted_game_with_campaign_complete")
         stats = campaign_statistics(game.campaign)
         bot.require(stats["story_done"] == 36 and stats["side_done"] == 12,
                     "Completion statistics disagree with mission records")
