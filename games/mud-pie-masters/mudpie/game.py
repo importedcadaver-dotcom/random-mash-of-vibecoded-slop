@@ -792,7 +792,7 @@ class Game:
                 fall_distance=(TABLE_Y-anim['origin'])*t*t
                 draw_pie(self.canvas,anim['pie'],
                          TABLE_X+anim['x']*anim['scale'],
-                         anim['origin']+fall_distance,anim['scale'])
+                         anim['origin']+fall_distance,anim['scale'],draw_shadow=False)
         else:
             self.paint.rect(self.canvas,(461,349,401,133),(226,208,166),23,(137,107,73),2,alpha=214)
             self.paint.text(self.canvas,'A blank canvas of glorious dirt!',(661,384),23,DARK,bold=True,center=True)
