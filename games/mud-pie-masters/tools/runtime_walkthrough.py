@@ -124,7 +124,9 @@ class Walkthrough:
         self.require(len(g.pie.layers) == 1, "Mud palette drag did not create first tier")
         self.capture("first_mud_scoop")
         self.key(pygame.K_1)
-        self.drag((654, 561), (699, 562))
+        # 170 px of stirring reaches the .30 worked threshold without
+        # over-wetting; the first story objective requires a WORKABLE tier.
+        self.drag((654, 561), (825, 562))
         self.key(pygame.K_2)
         before = g.pie.layers[0].volume
         self.drag((653, 554), (730, 552))
@@ -225,9 +227,14 @@ def main():
         print(f"{report['screenshot_count']} actual SDL screenshots saved to {args.output}")
     except Exception as exc:
         # Preserve last frame and traceback for CI artifact inspection.
-        runner.capture("failure_frame")
+        try:
+            runner.capture("failure_frame")
+        except Exception:
+            pass  # Never hide the original gameplay failure.
+        checks = getattr(runner.game, "mission_checks", [])
         report = {"success": False, "error": repr(exc),
                   "scene": runner.game.scene, "overlay": runner.game.overlay,
+                  "mission_checks": [[g.rule, g.kind, val, ok] for g, val, ok in checks],
                   "snapshots": runner.snapshots, "actions": runner.actions}
         (args.output / "walkthrough.json").write_text(
             json.dumps(report, indent=2) + "\n", encoding="utf-8"
