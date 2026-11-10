@@ -177,7 +177,8 @@ def _rough_outline(w, h, phase):
 
 def draw_pie(surf, pie: Pie, base_x: float, base_y: float, scale: float = 1.0,
              wobble: float = 0.0, show_structure: bool = False,
-             hidden_fallen: set[int] | None = None):
+             hidden_fallen: set[int] | None = None,
+             draw_shadow: bool = True):
     """Irregular earth-sculpted tiers with stratified texture; no cake cylinders.
 
     Geometry, centering and tier order are unchanged from the simulation so
@@ -186,8 +187,9 @@ def draw_pie(surf, pie: Pie, base_x: float, base_y: float, scale: float = 1.0,
     if not pie.layers:
         return
     base_x,base_y=int(base_x),int(base_y)
-    _ellipse(surf,(61,49,42),(base_x-140*scale,base_y-14*scale,280*scale,29*scale))
-    _ellipse(surf,(157,121,81),(base_x-131*scale,base_y-12*scale,262*scale,19*scale))
+    if draw_shadow:
+        _ellipse(surf,(61,49,42),(base_x-140*scale,base_y-14*scale,280*scale,29*scale))
+        _ellipse(surf,(157,121,81),(base_x-131*scale,base_y-12*scale,262*scale,19*scale))
     upward=0
     for i,layer in enumerate(pie.layers):
         if layer.fallen:
