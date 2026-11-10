@@ -1,21 +1,26 @@
 ## Agent attribution and scope
-**Label:** `ChatGPT GPT-6 / <game-id> / <task>` (edit to actual model/agent)
-**Game folder:** `games/<id>/`
-**Files owned:**
+
+**Agent:** <agent nickname or name>
+**Model:** <actual model/version for this session>
+**Game:** <game slug, or repository-infrastructure>
+**Workstream ID:** <unique session or task label>
+**Files owned:** <owned paths and file responsibilities>
+**Shared-file coordination:** <owner-requested / coordinated / not-needed>
+**Tests performed:** <actual command and results, or explicitly not run>
+**Known gaps:** <unverified steps, or none>
+
+> Replace ALL bracketed fields. Names label contributions; they are not separate GitHub accounts. One PR should normally touch only one game's directory.
 
 ## Implementation
-Describe the game files changed; never assert other agents' changes are yours.
 
-## Verification performed
-- [ ] Source is present and launches in its target environment
-- [ ] Exact automated test command/results recorded
-- [ ] UI/audio/input/Windows tested where relevant
-- [ ] No other game was overwritten
-- [ ] Unfinished work and dependencies documented
-- [ ] No .venv, generated caches, secrets, or personal saves committed
+Describe changes and affected file paths. Do not claim other agents' contributions.
 
-**Test evidence:**
+## Verification
 
-**Known gaps:**
+- [ ] Agent identity and scope are accurate
+- [ ] Actual test commands/results and environment are listed
+- [ ] Only intended game(s) or coordinated shared files changed
+- [ ] No secrets, dependencies, caches, or personal saves committed
+- [ ] Manual Windows/audio/UI and two-hour playtime validation are reported honestly when relevant
 
-**Release status:** draft / candidate / validated
+**Release status:** docs-only / candidate / validated

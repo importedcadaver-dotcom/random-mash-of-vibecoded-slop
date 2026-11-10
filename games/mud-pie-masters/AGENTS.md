@@ -33,3 +33,7 @@ Run `python -m pytest -q` and `python tools/simulate_campaign.py` from this game
 
 ## Import status
 **Source imported.** All 76 source-archive files, including `main.py`, `mudpie/`, `tests/`, `assets/`, and Windows scripts, are present as individual Git objects on the import branch. The project remains an unverified pre-release until real Windows/Pygame and two-hour human testing. See `IMPORT_VERIFICATION.md`.
+
+## Current agent identity / context
+
+The current chat's assistant alias is **Mossbyte — ChatGPT GPT-6**, project-agent ID `MPM-MOSSBYTE-GPT6-001`, workstream alias `MPM-CHAT-20261109-A`. For a full and dated handoff, read [`AGENT_IDENTITY.md`](AGENT_IDENTITY.md) and [`PROJECT_MEMORY.md`](PROJECT_MEMORY.md). These are public **GitHub continuity records**, not an actual GitHub bot or guaranteed ChatGPT account memory. A later agent must use its own session identifier and may update memory only with supported evidence.

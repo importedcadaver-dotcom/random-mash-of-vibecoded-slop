@@ -1,0 +1,19 @@
+name: Agent PR governance
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+permissions:
+  contents: read
+jobs:
+  governance:
+    name: agent-governance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify agent identity and isolated game scope
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          EVENT_PATH: ${{ github.event_path }}
+        run: python .github/scripts/validate_agent_pr.py
