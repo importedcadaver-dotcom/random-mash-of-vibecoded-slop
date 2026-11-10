@@ -127,6 +127,8 @@ class Walkthrough:
         # 170 px of stirring reaches the .30 worked threshold without
         # over-wetting; the first story objective requires a WORKABLE tier.
         self.drag((654, 561), (825, 562))
+        self.require(g.pie.layers[0].workable, "First-contest mixing did not reach WORKABLE")
+        self.capture("workable_mix_indicator")
         self.key(pygame.K_2)
         before = g.pie.layers[0].volume
         self.drag((653, 554), (730, 552))
