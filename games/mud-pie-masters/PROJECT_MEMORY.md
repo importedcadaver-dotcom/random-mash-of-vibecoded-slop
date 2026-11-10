@@ -62,3 +62,13 @@ Add a dated entry below with: task, author label, branch/PR, files changed, veri
 - **Not verified:** two hours of enjoyable human play, physical Windows display/input/audio, exe packaging, performance. `gameplay_hours_verified` remains **false**. The project is **v0.6.0-dev**, not a player-ready release. Continue to use Issue #2.
 - **Documentation:** [`QA_RUNTIME_v0.6.md`](QA_RUNTIME_v0.6.md) includes reproducible commands, artifact links and findings.
 - **No new game canon or final art approval introduced.** Previous v0.4 cub artwork remains a possible placeholder. All user-approved prior constraints preserved.
+
+### 2026-11-09 — Mossbyte / external reviews, full-campaign QA & Windows build (PR #8)
+
+- Workstream: `MPM-CHAT-20261109-A/full-campaign-and-windows-package`; branch `agent/mud-pie-masters/mossbyte-full-campaign-qa-20261109`.
+- **Research**: looked at official descriptions and reviews of Papa's Bakeria, Sticky Business, SuchArt and Passpartout 2 plus CozyGamers discussions. Main priority from reviews is satisfying tactile creativity over repetitive ingredient quotas. [GENRE_RESEARCH_AND_REVIEW.md](GENRE_RESEARCH_AND_REVIEW.md).
+- **Automated QA**: 138 tests passed on Windows and Linux; 48 Pygame scene/judging/presentation/save-reload cycles completed with 36 story and 12 side contests. Captured actual headless SDL screenshots including finale, scrapbook pages and restart. **All complex pie designs were constructed by the test oracle, not physically made through mouse gestures**. Existing v0.6 walkthrough exercises real SDL input and gestures for a sample round.
+- **Build**: PyInstaller onedir Windows executable created and **headless smoke launched** on GitHub Windows CI. Actual EXE loads original art, draws and saves a free-build pie, successfully exits. Downloadable CI artifact supplied as **MudPieMasters-Windows-PreRelease.zip**; keep executable together with `_internal` assets.
+- **Evidence**: [QA_FULL_CAMPAIGN_AND_BUILD.md](QA_FULL_CAMPAIGN_AND_BUILD.md); full run [#42744247759](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/actions/runs/42744247759); Windows executable [#42744247649](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/actions/runs/42744247649).
+- **Limitations**: NO physical Windows manual or audio/fullscreen/hardware performance test, NO observed human full playthrough, and **NO verified 2-hour enjoyable first-play experience**. This is a **v0.6.1-QA pre-release**. Never tell the user it is ready for first play until evidence exists. `gameplay_hours_verified=false` remains in `game.json`.
+- Existing cute baby cub art remains a provisional possible placeholder; game identity and other games untouched. No new unapproved canon.
