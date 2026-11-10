@@ -1,4 +1,4 @@
-# MUD PIE MASTERS · v0.6 Automated Gameplay Reliability Candidate
+# MUD PIE MASTERS · v0.6.1 QA Candidate (Not a 2-Hour Release)
 
 A fully offline Windows desktop crafting/competition game for Python 3.12 and **Pygame Community Edition**. Play as a baby brown bear competing with sibling cubs Bruno and Daisy. Nothing in the mud-pie contest is edible.
 
@@ -180,3 +180,23 @@ python tools/runtime_walkthrough.py --output qa-artifacts/runtime
 ```
 
 The event-driven bot shares the game's real SDL event dispatcher, completes the first story challenge through UI events, exercises undo/redo and sibling interactions, saves a free-build entry, and tests a resized letterboxed window. Its 20 screenshots per platform and JSON trace are uploaded by GitHub Actions. This automated path does **not** replace a physical Windows playtest or provide evidence of two enjoyable hours. See [v0.6 runtime QA](QA_RUNTIME_v0.6.md).
+
+## Completed-game automated QA and Windows game package
+
+v0.6.1-QA adds a **48-contest runtime walkthrough**, not just synthetic score tests:
+each story/commission is judged, presented and saved in the actual Pygame scene
+system under SDL test drivers on Windows and Linux. A challenge test oracle
+constructs the complex pies and mouse events handle the first mud scoop,
+submission and presentation. **This is not 48 human-crafted mouse playthroughs**.
+See [full campaign QA and build](QA_FULL_CAMPAIGN_AND_BUILD.md).
+
+A Windows **MudPieMasters-Windows-PreRelease.zip** is built by a protected GitHub
+Actions Windows job: it includes the real MudPieMasters.exe and _internal folder,
+requires no local Python, and has passed an isolated packaged GUI smoke test.
+Extract *the full archive* to a new folder and double-click MudPieMasters.exe.
+See [Windows Actions build](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/actions/workflows/mud-pie-masters-windows-build.yml).
+
+**Release constraint:** The game has **NOT** passed a genuine human two-hour
+enjoyment playtest. The author explicitly requested that first play be held
+until this threshold is met; downloading the QA preview does **not** mean it is
+certified ready. `gameplay_hours_verified` is still false.
