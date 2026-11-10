@@ -16,13 +16,13 @@ Checks were performed on 2026-11-08 in the current Windows environment.
 
 ## Game verification
 
-`node verify.js` passed for the base-builder expansion. The local harness parses and executes the game's real JavaScript with a mock DOM and covers:
+`node verify.js` passed for the village-map and live-raid revision. The local harness parses and executes the game's real JavaScript with a mock DOM and controllable clock and covers:
 
-- building placement and upgrades, resource caps and production, all five unit types, squad selection, save and reload, raid rewards, survivor return, and home defense
-- two rival wins and the third rival's unlock
-- climber bypass, screecher stun, tunnel breach, and sleepy-cub timing
+- building placement and upgrades, resource caps and production, all five unit types, squad selection, save and reload, and home defense
+- deployment from trail edges, cub movement and autonomous attacks, guard counterattacks, raid rewards, and two rival wins
+- climber routes, roller wall damage, screecher stun, tunnel damage, and sleepy-cub timing
 - the advanced-guard loss scene, emotional response, and saved casualty
 - no external network dependency in the game source
 
-The browser's visual layout and real input behavior still need a browser playthrough because the browser policy prevented local-page access in this session.
+The preview server started, but the in-app browser timed out opening the local URL. Visual layout and real pointer input remain unverified.
 
