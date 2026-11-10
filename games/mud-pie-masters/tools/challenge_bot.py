@@ -37,13 +37,14 @@ def design_for(challenge):
     kinds = [k for k in ('petals','leaves','berries','pebbles','sticks') if k in allowed]
     desired_kinds = int(wants.get('kinds_min', 0))
     for g in challenge.goals:
-        if g.rule == 'kind_min' and g.kind not in kinds:
+        if g.rule in ('kind_min', 'shaped_decos_min') and g.kind not in kinds:
             raise ValueError('Impossible requirement: '+challenge.id)
 
     # Add balanced pairs of each ingredient, coloring within a newly unlocked palette.
     required = Counter()
     for g in challenge.goals:
-        if g.rule == 'kind_min': required[g.kind] = max(required[g.kind], int(g.target))
+        if g.rule in ('kind_min','shaped_decos_min'):
+            required[g.kind] = max(required[g.kind], int(g.target))
     for kind in kinds[:desired_kinds]:
         required[kind] = max(required[kind], 2)
     symmetry_required = any(g.rule == 'feature_min' and g.kind == 'Symmetry' for g in challenge.goals)
@@ -84,5 +85,14 @@ def design_for(challenge):
     if 'angle_variants_min' in wants:
         for i in range(int(wants['angle_variants_min'])):
             pie.add_deco(kinds[0], i % count, .7, .6, angle=i * 60)
+    # Shape goals must correspond to real altered decoration geometry,
+    # not magically completed counters or ingredient-count padding.
+    for goal in challenge.goals:
+        if goal.rule == 'shaped_decos_min':
+            matches = [d for d in pie.decorations if d.kind == goal.kind]
+            if len(matches) < int(goal.target):
+                raise ValueError('Not enough shapeable decorations: ' + challenge.id)
+            for index, deco in enumerate(matches[:int(goal.target)]):
+                deco.stretch_x = 1.6 if index % 2 == 0 else .73
     return pie
 
