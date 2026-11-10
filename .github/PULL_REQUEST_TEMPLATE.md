@@ -1,21 +1,27 @@
 ## Agent attribution and scope
-**Label:** `ChatGPT GPT-6 / <game-id> / <task>` (edit to actual model/agent)
-**Game folder:** `games/<id>/`
-**Files owned:**
+
+**Agent:** Mossbyte
+**Model:** ChatGPT GPT-6
+**Game:** mud-pie-masters
+**Workstream ID:** MPM-CHAT-20261109-A
+**Files owned:** games/mud-pie-masters/ and coordinated shared documentation
+**Shared-file coordination:** owner-requested
+**Tests performed:** Documentation-only changes; Python governance script validated in CI (update this field to actual result)
+**Known gaps:** GitHub ruleset setup requires owner administration; game playtime remains unverified
+
+> Replace all example values with the actual agent, model, game, workstream, scope, test evidence and gaps for THIS PR. This template's example identity must not be reused blindly.
+> For a shared-only PR, use Game: repository-infrastructure and Shared-file coordination: coordinated.
 
 ## Implementation
-Describe the game files changed; never assert other agents' changes are yours.
 
-## Verification performed
-- [ ] Source is present and launches in its target environment
-- [ ] Exact automated test command/results recorded
-- [ ] UI/audio/input/Windows tested where relevant
-- [ ] No other game was overwritten
-- [ ] Unfinished work and dependencies documented
-- [ ] No .venv, generated caches, secrets, or personal saves committed
+Describe changes and affected file paths. Do not claim other agents' contributions.
 
-**Test evidence:**
+## Verification
 
-**Known gaps:**
+- [ ] PR fields identify the actual agent and workstream
+- [ ] Exact executed test commands, environment, and results are reported
+- [ ] Only intended game(s) or explicitly coordinated shared files changed
+- [ ] No secrets, dependencies, caches, or personal saves committed
+- [ ] Any UI/audio/Windows/manual playtesting is stated as confirmed or still missing
 
-**Release status:** draft / candidate / validated
+**Release status:** docs-only / candidate / validated
