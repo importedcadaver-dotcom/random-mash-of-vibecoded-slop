@@ -5,8 +5,8 @@
   "platform": [
     "Windows"
   ],
-  "version": "0.6.1-qa",
-  "status": "full-campaign-automated-runtime-tested",
+  "version": "0.7.0-dev",
+  "status": "first-play-rescue-in-progress",
   "release_status": "pre-release-candidate",
   "offline": true,
   "paid_dependencies": false,
@@ -17,5 +17,6 @@
   "test_command": "python -m pytest -q",
   "automation_qa": "SDL event-driven Windows/Linux CI, 20 screenshot walkthrough frames per OS",
   "windows_exe_qa": "PyInstaller onedir built on Windows Actions; headless executable smoke verified",
-  "full_campaign_qa": "48 Pygame scoring/presentation/save loops with oracle-built test pies; not human playtime"
+  "full_campaign_qa": "48 Pygame scoring/presentation/save loops with oracle-built test pies; not human playtime",
+  "first_human_playtest": "Chapter 1 feedback in issue #9; comprehension, accessibility and mud physics fixes outstanding"
 }

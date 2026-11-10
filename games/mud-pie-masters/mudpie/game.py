@@ -51,6 +51,8 @@ class Game:
         self.running = True
         self.pie = Pie()
         self.tool = 0
+        self.guide_page = 0  # The initial lesson shows one tool, never a wall of text.
+        self.focus_layer_index = 0
         self.selected = 'petals'
         self.drag = None
         self.undos: list[dict] = []
@@ -127,6 +129,8 @@ class Game:
         self.pie = Pie(title=f'My masterpiece #{self.round_no}')
         self.drag = None
         self.tool = 0
+        self.focus_layer_index = 0
+        self.guide_page = 0
         self.color_variant = min(self.color_variant, unlocked_colors(self.campaign) - 1)
         self.mirror_mode = False
         if self.mission and self.selected not in (self.mission.allowed or INGREDIENTS):
@@ -180,6 +184,8 @@ class Game:
         self.undos.clear()
         self.redos.clear()
         self.tool = 0
+        self.focus_layer_index = 0
+        self.guide_page = 0
         self.color_variant = 0
         self.mirror_mode = False
         self.drag = None
@@ -233,11 +239,17 @@ class Game:
             if encouragement:
                 for rival in self.rivals:
                     rival.affection = min(100, rival.affection + 4)
+                    rival.confidence = min(100, rival.confidence + 4)
+                    rival.rivalry = max(0, rival.rivalry - 4)
                     rival.remember('You encouraged us before a big chapter.')
                 self.notify('Both cubs beam. They will remember your kindness.')
             else:
                 for rival in self.rivals:
-                    rival.affection = max(5, rival.affection - 2)
+                    # A friendly challenge is NOT a morally inferior option.
+                    # It builds confidence and competitive intensity instead.
+                    rival.affection = min(100, rival.affection + 2)
+                    rival.confidence = min(100, rival.confidence + 7)
+                    rival.rivalry = min(100, rival.rivalry + 7)
                     rival.remember('You challenged us to build something better.')
                 self.notify('Bruno grins at your challenge; Daisy looks determined.')
             self.save()
@@ -245,6 +257,7 @@ class Game:
 
     def start_crafting(self):
         self.scene = 'craft'
+        self.guide_page = 0
         if not self.settings.get('tutorial_seen',False):
             self.settings['tutorial_seen'] = True
             self.save()
@@ -449,7 +462,8 @@ class Game:
         stats = campaign_statistics(self.campaign)
         self.paint.wrap(self.canvas,'36 story contests, 12 woodland commissions, six chapters, and two very competitive siblings.',96,330,585,19)
         self.paint.text(self.canvas,f"Story {stats['story_done']}/36  ·  Commissions {stats['side_done']}/12  ·  {stats['stars']} stars",(96,409),19,DARK,bold=True)
-        self.button((96,451,332,57),'CONTINUE THE STORY',
+        self.button((96,451,332,57),
+                    'START THE STORY' if self.campaign['next_story']==0 and not self.campaign['seen_chapters'] else 'CONTINUE THE STORY',
                     self.begin_round if available_story(self.campaign) else lambda:setattr(self,'scene','epilogue'),primary=True)
         self.button((443,451,284,57),'CHAPTER MAP',lambda:setattr(self,'scene','campaign'))
         self.button((96,521,332,54),'FREE-BUILD MEADOW',self.start_free_build)
@@ -695,7 +709,18 @@ class Game:
             'DRAG MUD to add a tier; drag an existing tier to shift its balance.',
             f'DRAG {self.selected.upper()} from the tray onto a tier. Right-click to remove.'
         )[self.tool]
-        self.paint.text(self.canvas,instr,(339,122),17,INK,max_w=670)
+        if self.mission and self.mission.id=='story-01-01':
+            has_workable = any(layer.workable for layer in self.pie.layers)
+            petals = sum(d.kind=='petals' for d in self.pie.decorations)
+            if not self.pie.layers:
+                instr = 'STEP 1: Drag MUD from the left tray onto the workbench.'
+            elif not has_workable:
+                instr = 'STEP 2: Mix mud (tool 1). Watch KNEAD and MOISTURE below.'
+            elif petals < 3:
+                instr = f'STEP 3: Drag PETALS onto your pie ({petals}/3 placed).'
+            else:
+                instr = 'All crafting goals met! You can SUBMIT PIE at top right.'
+        self.paint.text(self.canvas,instr,(339,122),16,INK,max_w=670)
         if self.pie.layers:
             wobble=math.sin(self.timer*8)*3 if stab.risk!='stable' and not self.settings['reduced_motion'] else 0
             draw_pie(self.canvas,self.pie,TABLE_X,TABLE_Y,self._work_scale(),wobble)
@@ -721,11 +746,30 @@ class Game:
             if WORKSPACE.collidepoint(self.mouse):
                 pygame.draw.circle(self.canvas,(255,241,189),(x,y),18,2)
         self.paint.rect(self.canvas,(314,647,714,58),(222,204,161),15,(134,109,72),2,alpha=247)
-        tip=("Mix a tier by circling your paw. Knead until firm; excessive water is risky.",
-             "Stretch sideways to flatten; drag up to thicken and narrow. No free mud!",
-             "Stack: drag a tier to move it; drag upward to bring it to the top.",
-             "Decorate: choose a color (C), mirror pairs (M), and drag items. R rotates latest.")[self.tool]
-        self.paint.wrap(self.canvas,tip,329,658,683,16)
+        if self.pie.layers and self.tool==0:
+            # Focus on the tier the paw touched, rather than a hidden average.
+            idx = min(max(0,self.focus_layer_index),len(self.pie.layers)-1)
+            tier = self.pie.layers[idx]
+            k = tier.worked
+            w = tier.wetness
+            state=('WORKABLE - STOP MIXING!' if tier.workable else
+                   'TOO WET - UNDO LAST STIR' if w>.73 else
+                   'NEAR TOO WET - STOP SOON' if w>.69 else
+                   'KEEP KNEADING TO 30%')
+            self.paint.text(self.canvas,f'KNEAD  {round(k*100)}%  (need 30%)',(330,653),13,DARK,bold=True)
+            self.paint.text(self.canvas,f'MOISTURE  {round(w*100)}%  (42-73% OK)',(617,653),13,DARK,bold=True)
+            self.paint.rect(self.canvas,(330,677,245,11),(186,175,141),2)
+            self.paint.rect(self.canvas,(330,677,round(245*k),11),(58,139,93) if k>=.3 else (177,105,61),2)
+            self.paint.rect(self.canvas,(617,677,245,11),(186,175,141),2)
+            self.paint.rect(self.canvas,(617,677,round(245*w),11),(58,139,93) if .42<=w<=.73 else (177,105,61),2)
+            self.paint.text(self.canvas,state,(876,658),12,(42,100,62) if tier.workable else (137,65,51),
+                            bold=True,max_w=138)
+        else:
+            tip=("Mix: watch KNEAD and MOISTURE when you work a tier.",
+                 "Stretch sideways to flatten; drag up to thicken and narrow.",
+                 "Stack: drag sideways to move, or UP to reorder a tier.",
+                 "Decorate: drag items. R rotates the latest.")[self.tool]
+            self.paint.wrap(self.canvas,tip,329,658,683,16)
 
     def draw_presentation(self):
         self.canvas.blit(self.paint.images['forest'],(0,0))
@@ -911,22 +955,51 @@ class Game:
             self._overlay_button((376,483,532,48),'FULLSCREEN / WINDOWED (F11)',self.toggle_fullscreen)
             self._overlay_button((376,556,532,58),'RETURN TO THE GAME',self.close_overlay,True)
         elif self.overlay=='tutorial':
+            # A small page at a time; a first-time player is never hit with
+            # nine instructions before touching the mud.
             self.paint.rect(self.canvas,(233,103,814,515),CREAM,27,(88,77,51),4)
-            self.paint.text(self.canvas,'HOW TO BECOME A MUD LEGEND',(273,133),32,DARK,bold=True)
-            lines=[
-                '1. DRAG MUD from the tray. Every scoop has a finite fixed volume.',
-                '2. SCOOP / MIX (1): stir across a tier until the mud holds together.',
-                '3. SHAPE (2): spread sideways to flatten; UP thickens and narrows.',
-                '4. STACK (3): move tiers sideways, or drag UP to reorder them.',
-                '5. DECORATE (4): drag objects onto tiers; spread details out!',
-                '6. Right-click a decoration to remove it; right-click mud for a new shape.',
-                '7. Ctrl+Z/Y undo/redo; R rotates the latest decoration.',
-                '8. C changes colors. M mirrors (Ch. 2); D dries mud (Ch. 4).',
-                '9. In the clearing, cheer or dare a sibling to change their entry.'
+            pages = [
+                ('1 / 5  YOUR FIRST SCOOP', [
+                    'Grab MUD from the left ingredient tray and drag it onto the table.',
+                    'Release the mouse over the workbench to make one muddy tier.',
+                    'Then use SCOOP / MIX (1) to work that mud with your paw.'
+                ]),
+                ('2 / 5  MIX WITHOUT GUESSING', [
+                    'Choose SCOOP / MIX (1) and drag across a mud tier.',
+                    'The workbench shows KNEAD and MOISTURE as separate bars.',
+                    'Workable means KNEAD at least 30% and MOISTURE 42–73%.',
+                    'Stop when WORKABLE appears. If too soupy, use UNDO.'
+                ]),
+                ('3 / 5  SHAPE AND FLATTEN', [
+                    'Choose SHAPE / FLATTEN (2), then drag the mud sideways.',
+                    'Wider mud becomes thinner; dragging up makes it taller.',
+                    'One scoop keeps the same amount of mud as you reshape.'
+                ]),
+                ('4 / 5  STACK YOUR TIERS', [
+                    'Drag another MUD scoop onto the workbench to add a tier.',
+                    'Choose STACK (3) and drag a tier sideways to offset it.',
+                    'Drag a tier UP to move it to the top of the pile.'
+                ]),
+                ('5 / 5  DECORATE AND REMEMBER', [
+                    'Drag PETALS, STICKS, LEAVES, PEBBLES or BERRIES onto a tier.',
+                    'Choose DECORATE (4) to reposition decorations.',
+                    'UNDO and REDO are on the right side (also Ctrl+Z / Ctrl+Y).',
+                    'Press H or F1, or click HELP / ?, whenever you need this guide.'
+                ])
             ]
+            page = max(0,min(len(pages)-1,self.guide_page))
+            title, lines = pages[page]
+            self.paint.text(self.canvas,'LEARN ONE MUD TRICK AT A TIME',(273,133),30,DARK,bold=True)
+            self.paint.text(self.canvas,title,(277,197),24,DARK,bold=True)
             for i,line in enumerate(lines):
-                self.paint.wrap(self.canvas,line,278,191+i*38,730,17)
-            self._overlay_button((438,541,401,56),'I GOT THIS!',self.close_overlay,True)
+                self.paint.wrap(self.canvas,line,283,259+i*50,720,18)
+            if page>0:
+                self._overlay_button((270,541,150,56),'BACK',
+                                     lambda:setattr(self,'guide_page',max(0,self.guide_page-1)))
+            self._overlay_button((438,541,401,56),'LET ME TRY IT',self.close_overlay,True)
+            if page<len(pages)-1:
+                self._overlay_button((854,541,153,56),'NEXT',
+                                     lambda:setattr(self,'guide_page',min(4,self.guide_page+1)))
         elif self.overlay=='report':
             self.paint.rect(self.canvas,(216,88,848,544),CREAM,26,(96,80,57),4)
             self.paint.text(self.canvas,'CONTEST REPORT', (260,117),34,DARK,bold=True)
@@ -957,7 +1030,8 @@ class Game:
             self._sprite('daisy',(895,351),(164,196))
             self.paint.wrap(self.canvas,ch.bruno_line,244,464,354,18)
             self.paint.wrap(self.canvas,ch.daisy_line,665,464,346,18)
-            self._overlay_button((256,558,355,58),'ENCOURAGE MY SIBLINGS',lambda:self.choose_chapter(True),True)
+            # Give both decisions identical visual emphasis; neither is 'correct'.
+            self._overlay_button((256,558,355,58),'ENCOURAGE MY SIBLINGS',lambda:self.choose_chapter(True))
             self._overlay_button((626,558,384,58),'CHALLENGE THEM TO COMPETE',lambda:self.choose_chapter(False))
         elif self.overlay=='goals':
             self.paint.rect(self.canvas,(209,93,862,535),CREAM,25,(94,77,52),4)
@@ -1127,6 +1201,7 @@ class Game:
             self.notify('Grab MUD from the ingredient tray first!')
             return
         self.snapshot()
+        self.focus_layer_index = l
         layer=self.pie.layers[l]
         if self.tool==0:
             self.drag={'type':'mix','idx':l,'last':pos,'distance':0,'initial':layer.wetness,'worked':layer.worked}
@@ -1197,6 +1272,7 @@ class Game:
                 # A scoop is always the same finite quantity of mud.
                 wet=.42+(.13 if self.mission and self.mission.weather=='rain' else 0)
                 self.pie.add_layer(x,190,46,wet)
+                self.focus_layer_index = len(self.pie.layers)-1
                 self.add_mud_flecks(pos, 12)
                 self.tool=2 if len(self.pie.layers)>1 else 0
                 self.sfx('splat')
@@ -1235,9 +1311,9 @@ class Game:
             self.add_mud_flecks(pos, 7)
             self.sfx('squish')
             layer=self.pie.layers[d['idx']]
-            self.notify('Nicely kneaded! Your mud is pliable and cohesive.' if layer.workable
-                        else 'Too soupy! Pat this layer dry (D from Storm Season).'
-                        if layer.wetness>.73 else 'Keep stirring to bind the muddy grains.')
+            self.notify('WORKABLE! Stop mixing now; more stirring adds moisture.' if layer.workable
+                        else 'Too soupy: click UNDO to reverse that stir. Drying unlocks later.'
+                        if layer.wetness>.73 else 'Keep stirring until KNEAD reaches 30%; watch MOISTURE too.')
         elif d['type']=='deco':
             self.sfx('pop')
 

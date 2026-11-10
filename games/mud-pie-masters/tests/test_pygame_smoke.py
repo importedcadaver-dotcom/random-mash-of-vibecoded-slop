@@ -246,7 +246,7 @@ def test_player_can_knead_a_real_tier_into_a_workable_state(app):
         app.on_motion((x,560))
     app.on_up((879,560),1)
     assert layer.workable
-    assert 'kneaded' in app.toast.lower()
+    assert 'workable' in app.toast.lower()
 
 
 def test_sibling_choice_changes_both_opponent_entry_and_relationship(app):
