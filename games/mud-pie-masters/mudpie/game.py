@@ -303,6 +303,8 @@ class Game:
             if idx == 0 and not any(recent):
                 recent = [item.get('signature', '') for item in self.gallery]
             self.judgments.append(judge(entry, self.theme[2], recent, weather=self.mission.weather if self.mission else 'clear'))
+        # A crafting notification must not obscure the next scene's heading.
+        self.toast_time = 0
         self.scene = 'presentation'
         self.presentation_step = 0
         self.presentation_since = self.timer
@@ -320,6 +322,9 @@ class Game:
         self.events = events
         self.mission_medals = 0
         self.mission_checks = []
+        # Discard stale shaping hints on the results screen. A real chapter
+        # completion may still display its own fresh notification below.
+        self.toast_time = 0
         if self.mission:
             self.mission_medals, self.mission_checks = medals_for(
                 self.mission, self.pie, self.judgments[0].total)
@@ -653,8 +658,11 @@ class Game:
         if self.mission and self.mission.weather != 'clear':
             self.paint.text(self.canvas,f'Weather: {self.mission.weather.upper()}',
                             (1055,313),12,(150,86,64),bold=True)
-        self.paint.text(self.canvas,'TODAY’S CHALLENGE' if self.mission else 'CREATIVE MEADOW',
-                        (1055,335),17,DARK,bold=True)
+        if self.mission:
+            self.button((1054,329,190,27),'VIEW ALL GOALS',
+                        lambda:self.show_overlay('goals'),small=True)
+        else:
+            self.paint.text(self.canvas,'CREATIVE MEADOW',(1055,335),17,DARK,bold=True)
         if self.mission:
             for i,goal in enumerate(self.mission.goals[:3]):
                 value, ok = goal_progress(self.pie,goal, self.mission.weather)
@@ -663,7 +671,7 @@ class Game:
                 # and concealed essential rules from new players.
                 y = 356 + i * 24
                 self.paint.text(self.canvas,('OK ' if ok else '- ')+goal.label,
-                                (1055,y),11,(54,130,72) if ok else INK,max_w=187)
+                                (1055,y),10,(54,130,72) if ok else INK,max_w=197)
                 self.paint.text(self.canvas,f'{value:g}/{goal.target:g}',
                                 (1197,y+12),10,(54,130,72) if ok else INK,max_w=50)
         else:
@@ -805,9 +813,8 @@ class Game:
             y=468+j*51
             self.paint.text(self.canvas,f'{v.name} · {v.score:.1f}',(861,y),17,INK,bold=True)
             self.paint.text(self.canvas,v.comment,(861,y+22),14,(94,88,70),max_w=350)
-        if self.events:
-            event=self.events[1 if self.inspected==2 else 0]
-            self.paint.text(self.canvas,event,(860,628),13,(110,78,60),max_w=349)
+        self.button((859,626,359,36),'FULL JUDGE COMMENTS',
+                    lambda:self.show_overlay('judge_notes'),small=True)
         retry_required=(self.mission is not None and not self.mission.side
                         and self.mission_medals==1 and
                         STORY.index(self.mission)==self.campaign['next_story'])
@@ -952,6 +959,39 @@ class Game:
             self.paint.wrap(self.canvas,ch.daisy_line,665,464,346,18)
             self._overlay_button((256,558,355,58),'ENCOURAGE MY SIBLINGS',lambda:self.choose_chapter(True),True)
             self._overlay_button((626,558,384,58),'CHALLENGE THEM TO COMPETE',lambda:self.choose_chapter(False))
+        elif self.overlay=='goals':
+            self.paint.rect(self.canvas,(209,93,862,535),CREAM,25,(94,77,52),4)
+            self.paint.text(self.canvas,'TODAY’S CRAFTING GOALS',(249,123),31,DARK,bold=True)
+            if self.mission:
+                self.paint.text(self.canvas,self.mission.title,(254,173),24,DARK,bold=True)
+                self.paint.wrap(self.canvas,self.mission.description,254,210,754,18)
+                for i,goal in enumerate(self.mission.goals):
+                    value,ok=goal_progress(self.pie,goal,self.mission.weather)
+                    y=277+i*79
+                    self.paint.rect(self.canvas,(251,y,774,69),
+                                    (187,205,158) if ok else (230,215,183),5)
+                    self.paint.text(self.canvas,('COMPLETE' if ok else 'IN PROGRESS')+
+                                    ' — '+goal.label,(269,y+9),19,DARK,bold=True,max_w=724)
+                    self.paint.text(self.canvas,f'Current: {value:g} / required: {goal.target:g}',
+                                    (269,y+37),16,INK,max_w=705)
+            self._overlay_button((423,549,435,55),'BACK TO MY WORKBENCH',
+                                 self.close_overlay,True)
+        elif self.overlay=='judge_notes':
+            self.paint.rect(self.canvas,(202,78,877,571),CREAM,25,(94,77,52),4)
+            name=self.names[self.inspected]
+            self.paint.text(self.canvas,f'WHAT THE JUDGES SAID ABOUT {name.upper()}',
+                            (239,109),27,DARK,bold=True,max_w=807)
+            evaluation=self.judgments[self.inspected]
+            for i,verdict in enumerate(evaluation.verdicts):
+                y=163+i*103
+                self.paint.rect(self.canvas,(231,y,819,95),PAPER,8,(146,124,86),1)
+                self.paint.text(self.canvas,f'{verdict.name} · {verdict.score:.1f} points',
+                                (250,y+10),20,DARK,bold=True)
+                self.paint.wrap(self.canvas,verdict.comment,251,y+40,779,17)
+            if self.events:
+                note=self.events[1 if self.inspected==2 else 0]
+                self.paint.wrap(self.canvas,'Sibling moment: '+note,247,487,776,16)
+            self._overlay_button((430,576,421,54),'BACK TO SCORES',self.close_overlay,True)
         elif self.overlay=='reset':
             self.paint.rect(self.canvas,(358,230,564,263),CREAM,25,(96,82,55),4)
             self.paint.text(self.canvas,'START OVER?',(399,268),35,DARK,bold=True)
