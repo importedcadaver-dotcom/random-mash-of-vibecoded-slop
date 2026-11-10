@@ -114,7 +114,9 @@ def decoration_anchor(pie: Pie, d: Decoration, base_x: float, base_y: float, sca
 
 
 def draw_ingredient(surf, kind: str, x: float, y: float, scale: float = 1,
-                    angle: float = 0, color_variant: int = 0):
+                    angle: float = 0, color_variant: int = 0,
+                    stretch_x: float = 1.0, stretch_y: float = 1.0):
+    """Render a draggable ingredient, including stretched or flattened petals/sticks."""
     x, y = int(x), int(y)
     radius = max(2, int(10 * scale))
     rad = radians(angle)
@@ -136,9 +138,11 @@ def draw_ingredient(surf, kind: str, x: float, y: float, scale: float = 1,
                 (250, 234, 214), (167, 215, 235), (239, 134, 94)]
         for a in range(0, 360, 72):
             rr = radians(a + angle)
-            cx = x + cos(rr)*radius*.9
-            cy = y + sin(rr)*radius*.9
-            _ellipse(surf, cols[color_variant % 6], (cx-radius*.66,cy-radius*.66,radius*1.32,radius*1.32))
+            cx = x + cos(rr)*radius*.9*stretch_x
+            cy = y + sin(rr)*radius*.9*stretch_y
+            _ellipse(surf, cols[color_variant % 6],
+                     (cx-radius*.66*stretch_x,cy-radius*.66*stretch_y,
+                      radius*1.32*stretch_x,radius*1.32*stretch_y))
         pygame.draw.circle(surf, (250, 209, 113), (x,y), max(2, int(4*scale)))
     elif kind == 'pebbles':
         rock_palette = [(160,171,160),(186,164,140),(148,165,182),
@@ -148,11 +152,15 @@ def draw_ingredient(surf, kind: str, x: float, y: float, scale: float = 1,
         _ellipse(surf, stone, (x-11*scale,y-9*scale,22*scale,15*scale))
         _ellipse(surf, (217, 223, 211), (x-7*scale,y-7*scale,7*scale,3*scale))
     elif kind == 'sticks':
-        ex, ey = cos(rad) * 21*scale, sin(rad) * 21*scale
-        pygame.draw.line(surf, (84, 53, 39), (x-ex,y-ey), (x+ex,y+ey), max(3, int(scale*8)))
+        ex, ey = cos(rad) * 21*scale*stretch_x, sin(rad) * 21*scale*stretch_y
+        pygame.draw.line(surf, (84, 53, 39), (x-ex,y-ey), (x+ex,y+ey),
+                         max(2, int(scale*8*stretch_y)))
         bark=[(178,128,83),(125,117,90),(199,149,101),(137,103,130),
               (159,159,116),(100,138,139)][color_variant%6]
-        pygame.draw.line(surf, bark, (x-ex,y-ey-2*scale), (x+ex,y+ey-2*scale), max(1,int(scale*3)))
+        pygame.draw.line(surf, bark,
+                         (x-ex,y-ey-2*scale*stretch_y),
+                         (x+ex,y+ey-2*scale*stretch_y),
+                         max(1,int(scale*3*stretch_y)))
     elif kind == 'berries':
         berry_palette=[((97,43,77),(180,72,103)),((88,87,130),(147,139,204)),
                        ((154,76,52),(225,132,82)),((76,122,79),(140,191,103)),
@@ -265,7 +273,8 @@ def draw_pie(surf, pie: Pie, base_x: float, base_y: float, scale: float = 1.0,
             py=base_y-(9+d.y*12)*scale
         else:
             px,py=decoration_anchor(pie,d,base_x,base_y,scale)
-        draw_ingredient(surf,d.kind,px,py,scale*min(1.15,max(.6,scale**-.15)),d.angle,d.color)
+        draw_ingredient(surf,d.kind,px,py,scale*min(1.15,max(.6,scale**-.15)),
+                        d.angle,d.color,d.stretch_x,d.stretch_y)
     for i,layer in enumerate(pie.layers):
         if not layer.fallen and layer.damage>.3:
             h=sum(l.height for l in pie.layers[:i+1] if not l.fallen)
