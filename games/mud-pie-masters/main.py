@@ -40,6 +40,13 @@ def main():
             assert game.scene == "gallery"
             assert (Path(isolated_save) / "save.json").exists()
             game.step_frame(1 / 60)
+            # A GUI EXE may not set PowerShell's LASTEXITCODE. Emit a
+            # machine-readable sentinel only after *all* packaged checks pass.
+            import json
+            Path("qa_packaged_ok.json").write_text(
+                json.dumps({"ok": True, "scene": game.scene,
+                            "renderer": "pygame", "asset": "forest",
+                            "free_build_save_verified": True}), encoding="utf-8")
             pygame.quit()
         return 0
     Game(display).run()
