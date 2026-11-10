@@ -180,3 +180,18 @@ def test_falling_snapshot_is_after_actual_gravity_displacement(game):
     assert 0 < anim['elapsed'] < anim['duration']
     t=anim['elapsed']/anim['duration']
     assert (TABLE_Y-anim['origin']) * t*t > 0
+
+
+def test_normal_sculpting_waits_until_gravity_lands(game):
+    """No player gesture can reorder the indices while falling art is active."""
+    gesture(game,(65,405),(655,553))
+    gesture(game,(65,405),(810,509))
+    assert game.fall_animations
+    before=game.pie.to_dict()
+    gesture(game,(655,555),(805,555))
+    gesture(game,(65,405),(655,507))
+    assert game.pie.to_dict()==before
+    assert "falling mud land" in game.toast.lower()
+    finish_fall(game)
+    gesture(game,(65,405),(655,507))
+    assert len(game.pie.layers)==3
