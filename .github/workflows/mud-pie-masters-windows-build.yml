@@ -35,11 +35,25 @@ jobs:
           python -m PyInstaller --noconfirm --clean --onedir --windowed --name MudPieMasters --add-data "assets;assets" main.py
           if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed" }
           if (-not (Test-Path "dist/MudPieMasters/MudPieMasters.exe")) { throw "Exe missing" }
-      - name: Execute packaged EXE with dummy SDL
+      - name: Execute packaged EXE with dummy SDL, wait and inspect marker
         shell: pwsh
         run: |
-          & "dist/MudPieMasters/MudPieMasters.exe" --qa-smoke
-          if ($LASTEXITCODE -ne 0) { throw "Built exe smoke test failed ($LASTEXITCODE)" }
+          @'
+          import json
+          from pathlib import Path
+          import subprocess
+          exe = str(Path("dist/MudPieMasters/MudPieMasters.exe").resolve())
+          result = subprocess.run([exe, "--qa-smoke"], timeout=60)
+          print("Packaged GUI process exit status:", result.returncode)
+          if result.returncode != 0:
+              raise SystemExit("Windowed executable exited with an error")
+          marker = Path("qa_packaged_ok.json")
+          if not marker.is_file():
+              raise SystemExit("No QA success marker was written by the packaged game")
+          obj = json.loads(marker.read_text(encoding="utf-8"))
+          assert obj["ok"] and obj["free_build_save_verified"] and obj["scene"] == "gallery", obj
+          print("PASS: packaged EXE loaded original assets, rendered game, and saved free build")
+          '@ | python -
       - name: Mark artifact as unverified pre-release
         shell: pwsh
         run: |
