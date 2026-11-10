@@ -161,6 +161,22 @@ class Walkthrough:
         self.require(g.pie.decorations[-1].angle == (angle_before+30)%360,
                      "Visible ROTATE LAST button did not rotate a decoration")
         self.capture("rotate_last_button")
+        # The existing shape tool also stretches petal clusters and
+        # flattens sticks. Use real SDL drags and capture both results.
+        self.key(pygame.K_4)
+        self.drag((65, 497), (745, 511))
+        self.drag((65, 591), (580, 564))
+        self.key(pygame.K_2)
+        self.drag((745, 511), (790, 511))
+        self.drag((580, 564), (580, 603))
+        self.require(any(d.kind == 'petals' and d.stretch_x > 1.3
+                         for d in g.pie.decorations),
+                     "Placed petal did not visibly stretch")
+        self.require(any(d.kind == 'sticks' and d.stretch_y < .8
+                         for d in g.pie.decorations),
+                     "Placed stick did not flatten")
+        self.capture("shaped_petals_and_sticks")
+        self.key(pygame.K_4)
         self.click(1135, 343)
         self.require(g.overlay == "goals", "Full crafting-goals panel did not open")
         self.capture("full_crafting_goals")

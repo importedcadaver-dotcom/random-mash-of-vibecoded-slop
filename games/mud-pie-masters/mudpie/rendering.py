@@ -22,12 +22,75 @@ MUD = (91, 61, 49)
 class Painter:
     def __init__(self):
         self.images = {p.stem: pygame.image.load(str(p)).convert_alpha() for p in ASSETS.glob('*.png')}
+        self._make_judges_match_cubs()
         self.fonts = {}
 
+    def _make_judges_match_cubs(self):
+        """Replace old teddy-bear judge portraits with distinctive forest bears.
+
+        Palette-swapped pixel-art cub silhouettes match the original siblings'
+        anatomy and drawing technique. Judge-only accessories make each
+        character recognizable without external art files or extra dependencies.
+        The original PNG assets are kept as reproducible source fallbacks.
+        """
+        schemes = {
+            'petal': ('daisy', {
+                '#cb955f':'#ae8253', '#f0ba80':'#d9af78',
+                '#9c6646':'#765537', '#ffe0a8':'#efc994',
+                '#9b77a7':'#7d7961', '#e6c6df':'#c7b78f'
+            }),
+            'boulder': ('bruno', {
+                '#925b3b':'#746252', '#c28a5b':'#9e8a75',
+                '#69422e':'#51443e', '#d6a071':'#c9ad88',
+                '#466b76':'#575b61', '#a1c5c0':'#b6b2a5'
+            }),
+            'fern': ('player', {
+                '#b9784a':'#98724d', '#de9c68':'#bd9969',
+                '#8a5339':'#6f553d', '#efbf87':'#e7c394',
+                '#a94c42':'#426e54', '#e19375':'#85a874'
+            }),
+        }
+        for judge,(source,recolors) in schemes.items():
+            if source not in self.images:
+                continue
+            image=self.images[source].copy()
+            pixels=pygame.PixelArray(image)
+            for original,replacement in recolors.items():
+                pixels.replace(pygame.Color(original), pygame.Color(replacement))
+            del pixels
+            # 300×360 artwork uses big readable, pixel-aligned accessories.
+            if judge=='petal':
+                for cx,cy in ((114,99),(151,82),(188,98)):
+                    pygame.draw.circle(image,(63,73,55),(cx,cy),17)
+                    for ox,oy in ((-7,0),(7,0),(0,-7),(0,7)):
+                        pygame.draw.circle(image,(213,141,146),(cx+ox,cy+oy),7)
+                    pygame.draw.circle(image,(245,215,136),(cx,cy),6)
+            elif judge=='boulder':
+                pygame.draw.line(image,(61,52,47),(80,197),(94,213),5)
+                pygame.draw.line(image,(201,185,165),(84,197),(97,209),2)
+                pygame.draw.polygon(image,(66,66,68),
+                                    ((151,283),(168,267),(188,276),(181,294),(161,299)))
+                pygame.draw.line(image,(191,185,161),(158,284),(183,284),3)
+            else:
+                pygame.draw.polygon(image,(52,86,62),
+                                    ((201,89),(251,62),(231,113),(208,118)))
+                pygame.draw.line(image,(193,170,114),(204,107),(243,75),4)
+                pygame.draw.polygon(image,(88,127,77),
+                                    ((115,271),(141,254),(140,279),(123,285)))
+            self.images[judge]=image
+
     def font(self, size: int, bold: bool = False):
+        """Use readable antialiased UI type, not tiny Consolas glyphs.
+
+        The base canvas is 1280×720; 10–12px labels became difficult to read
+        in Windows screenshots and on a rescaled display. The minimum 14px
+        font provides consistent readable body text, with Georgian headings.
+        """
+        size = max(14, int(size))
         key = (size, bold)
         if key not in self.fonts:
-            self.fonts[key] = pygame.font.SysFont('georgia' if bold and size >= 24 else 'consolas', size, bold=bold)
+            face = 'georgia' if bold and size >= 24 else 'verdana'
+            self.fonts[key] = pygame.font.SysFont(face, size, bold=bold)
         return self.fonts[key]
 
     def text(self, surf, value, pos, size=24, color=INK, bold=False, center=False, max_w=None):
@@ -93,7 +156,11 @@ class Painter:
         if name not in self.images:
             return
         source = self.images[name]
-        target = pygame.transform.scale(source, (int(size[0]), int(size[1])))
+        # Bruno's outer ear sits uncomfortably near the legacy sprite bounds.
+        # Inset his expressions rather than cutting his ear at the panel edge.
+        if name in ('bruno','bruno_blink','bruno_cheer','bruno_sad'):
+            size = (int(size[0]*.92),int(size[1]*.92))
+        target = pygame.transform.scale(source, (max(1,int(size[0])),max(1,int(size[1]))))
         rect = target.get_rect(center=pos) if center else target.get_rect(topleft=pos)
         rect.move_ip(0, int(bounce))
         surf.blit(target, rect)
@@ -114,7 +181,9 @@ def decoration_anchor(pie: Pie, d: Decoration, base_x: float, base_y: float, sca
 
 
 def draw_ingredient(surf, kind: str, x: float, y: float, scale: float = 1,
-                    angle: float = 0, color_variant: int = 0):
+                    angle: float = 0, color_variant: int = 0,
+                    stretch_x: float = 1.0, stretch_y: float = 1.0):
+    """Render a draggable ingredient, including stretched or flattened petals/sticks."""
     x, y = int(x), int(y)
     radius = max(2, int(10 * scale))
     rad = radians(angle)
@@ -136,9 +205,11 @@ def draw_ingredient(surf, kind: str, x: float, y: float, scale: float = 1,
                 (250, 234, 214), (167, 215, 235), (239, 134, 94)]
         for a in range(0, 360, 72):
             rr = radians(a + angle)
-            cx = x + cos(rr)*radius*.9
-            cy = y + sin(rr)*radius*.9
-            _ellipse(surf, cols[color_variant % 6], (cx-radius*.66,cy-radius*.66,radius*1.32,radius*1.32))
+            cx = x + cos(rr)*radius*.9*stretch_x
+            cy = y + sin(rr)*radius*.9*stretch_y
+            _ellipse(surf, cols[color_variant % 6],
+                     (cx-radius*.66*stretch_x,cy-radius*.66*stretch_y,
+                      radius*1.32*stretch_x,radius*1.32*stretch_y))
         pygame.draw.circle(surf, (250, 209, 113), (x,y), max(2, int(4*scale)))
     elif kind == 'pebbles':
         rock_palette = [(160,171,160),(186,164,140),(148,165,182),
@@ -148,11 +219,15 @@ def draw_ingredient(surf, kind: str, x: float, y: float, scale: float = 1,
         _ellipse(surf, stone, (x-11*scale,y-9*scale,22*scale,15*scale))
         _ellipse(surf, (217, 223, 211), (x-7*scale,y-7*scale,7*scale,3*scale))
     elif kind == 'sticks':
-        ex, ey = cos(rad) * 21*scale, sin(rad) * 21*scale
-        pygame.draw.line(surf, (84, 53, 39), (x-ex,y-ey), (x+ex,y+ey), max(3, int(scale*8)))
+        ex, ey = cos(rad) * 21*scale*stretch_x, sin(rad) * 21*scale*stretch_y
+        pygame.draw.line(surf, (84, 53, 39), (x-ex,y-ey), (x+ex,y+ey),
+                         max(2, int(scale*8*stretch_y)))
         bark=[(178,128,83),(125,117,90),(199,149,101),(137,103,130),
               (159,159,116),(100,138,139)][color_variant%6]
-        pygame.draw.line(surf, bark, (x-ex,y-ey-2*scale), (x+ex,y+ey-2*scale), max(1,int(scale*3)))
+        pygame.draw.line(surf, bark,
+                         (x-ex,y-ey-2*scale*stretch_y),
+                         (x+ex,y+ey-2*scale*stretch_y),
+                         max(1,int(scale*3*stretch_y)))
     elif kind == 'berries':
         berry_palette=[((97,43,77),(180,72,103)),((88,87,130),(147,139,204)),
                        ((154,76,52),(225,132,82)),((76,122,79),(140,191,103)),
@@ -265,7 +340,8 @@ def draw_pie(surf, pie: Pie, base_x: float, base_y: float, scale: float = 1.0,
             py=base_y-(9+d.y*12)*scale
         else:
             px,py=decoration_anchor(pie,d,base_x,base_y,scale)
-        draw_ingredient(surf,d.kind,px,py,scale*min(1.15,max(.6,scale**-.15)),d.angle,d.color)
+        draw_ingredient(surf,d.kind,px,py,scale*min(1.15,max(.6,scale**-.15)),
+                        d.angle,d.color,d.stretch_x,d.stretch_y)
     for i,layer in enumerate(pie.layers):
         if not layer.fallen and layer.damage>.3:
             h=sum(l.height for l in pie.layers[:i+1] if not l.fallen)

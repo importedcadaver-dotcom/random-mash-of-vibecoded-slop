@@ -457,17 +457,24 @@ class Game:
             self.buttons.append((rect, callback))
 
     def _heading(self, title, subtitle=None):
+        """Draw a persistent title with transient messages in its subtitle slot.
+
+        The old global toast sat over the title on clearing/results scenes.
+        Reusing the subtitle line keeps the heading and content unobstructed.
+        """
         self.paint.rect(self.canvas, (0, 0, 1280, 94), (31, 52, 46), 0, alpha=251)
         pygame.draw.line(self.canvas, (176, 145, 90), (0,93), (1280,93), 3)
         self.paint.text(self.canvas, title, (38, 15), 35, CREAM, bold=True, max_w=990)
+        if self.toast_time > 0 and self.scene not in ('craft', 'title'):
+            subtitle = self.toast
         if subtitle:
             self.paint.text(self.canvas, subtitle, (41, 63), 16, (212, 198, 160), max_w=1180)
 
     def _sprite(self, name, center, size, bounce=True, expression=None):
-        """Draw a real expression sprite for cubs; preserve existing judge assets.
+        """Draw original expressive cubs or matching forest-judge portraits.
 
-        Expressions share the same bounding box, so hitboxes, letterboxing and
-        composition stay stable. Reduced-motion also disables idle blinking.
+        Judge art is compiled by Painter from matching cub silhouettes.
+        Reduced-motion disables idle blinking; hitboxes remain unaffected.
         """
         key = 'player' if name.lower() == 'you' else name.lower()
         if key in ('player', 'bruno', 'daisy'):
@@ -765,7 +772,7 @@ class Game:
         self.paint.rect(self.canvas,(321,111,702,45),(228,213,173),15,(157,126,85),1,alpha=232)
         instr = (
             'DRAG MUD from the bowl to the table. Stir a tier by dragging it.',
-            'SPREAD sideways or THICKEN upward: the same mud changes shape.',
+            'SHAPE MUD, PETALS or STICKS: drag sideways to stretch; up to thicken.',
             'DRAG MUD to add a tier; drag an existing tier to shift its balance.',
             f'DRAG {self.selected.upper()} from the tray onto a tier. Right-click to remove.'
         )[self.tool]
@@ -835,7 +842,7 @@ class Game:
                             bold=True,max_w=138)
         else:
             tip=("Mix: watch KNEAD and MOISTURE when you work a tier.",
-                 "Stretch sideways to flatten; drag up to thicken and narrow.",
+                 "SHAPE mud or placed PETALS/STICKS: drag sideways or vertically.",
                  "Stack: drag sideways to move, or UP to reorder a tier.",
                  "Decorate: drag items. R rotates the latest.")[self.tool]
             self.paint.wrap(self.canvas,tip,329,658,683,16)
@@ -1045,7 +1052,8 @@ class Game:
                 ('3 / 5  SHAPE AND FLATTEN', [
                     'Choose SHAPE / FLATTEN (2), then drag the mud sideways.',
                     'Wider mud becomes thinner; dragging up makes it taller.',
-                    'One scoop keeps the same amount of mud as you reshape.'
+                    'One scoop keeps the same amount of mud as you reshape.',
+                    'Placed PETALS and STICKS can be stretched or flattened too.'
                 ]),
                 ('4 / 5  STACK YOUR TIERS', [
                     'Drag another MUD scoop onto the workbench to add a tier.',
@@ -1206,9 +1214,9 @@ class Game:
         elif self.scene=='gallery': self.draw_gallery()
         elif self.scene=='campaign': self.draw_campaign()
         elif self.scene=='epilogue': self.draw_epilogue()
-        if self.toast_time>0:
-            # Avoid covering the workbench title, which formerly spent much
-            # of crafting gameplay hidden behind long notifications.
+        if self.toast_time>0 and self.scene in ('craft', 'title'):
+            # Other scenes put notifications in the subtitle slot instead of
+            # covering their title; workbench/title keep their safe placards.
             if self.scene == 'craft' and not self.overlay:
                 r, center, max_w = (322, 166, 702, 43), (673, 187), 665
             else:
@@ -1291,6 +1299,15 @@ class Game:
                     self.place_decoration(self.selected,l,x,y)
                     self.sfx('pop')
             return
+        if self.tool==1:
+            deco_idx=self._deco_at(pos)
+            if deco_idx is not None:
+                deco=self.pie.decorations[deco_idx]
+                if deco.kind in ('petals','sticks'):
+                    self.snapshot()
+                    self.drag={'type':'deco_shape','idx':deco_idx,'start':pos,
+                               'stretch_x':deco.stretch_x,'stretch_y':deco.stretch_y}
+                    return
         l=self._layer_at(pos)
         if l is None:
             self.notify('Grab MUD from the ingredient tray first!')
@@ -1334,6 +1351,15 @@ class Game:
             else:
                 thickness=clamp(d['height']-dy*.65,23,93)
                 layer.reshape(layer.volume / thickness)
+        elif d['type']=='deco_shape':
+            deco=self.pie.decorations[d['idx']]
+            dx=(pos[0]-d['start'][0])/self._work_scale()
+            dy=(pos[1]-d['start'][1])/self._work_scale()
+            if abs(dx)>=abs(dy):
+                deco.stretch_x=clamp(d['stretch_x']+dx/58.,.5,2.3)
+            else:
+                # Moving down flattens; dragging up thickens the object.
+                deco.stretch_y=clamp(d['stretch_y']-dy/58.,.5,2.3)
         elif d['type']=='stackmove':
             layer=self.pie.layers[d['idx']]
             layer.x=clamp(d['initial_x']+(pos[0]-d['start'][0])/self._work_scale(),-205,205)
@@ -1416,6 +1442,10 @@ class Game:
             self.notify('WORKABLE! Stop mixing now; more stirring adds moisture.' if layer.workable
                         else 'Too soupy: click UNDO to reverse that stir. Drying unlocks later.'
                         if layer.wetness>.73 else 'Keep stirring until KNEAD reaches 30%; watch MOISTURE too.')
+        elif d['type']=='deco_shape':
+            deco=self.pie.decorations[d['idx']]
+            self.notify(f'{deco.kind.title()} reshaped! Width {deco.stretch_x:.1f}x, thickness {deco.stretch_y:.1f}x.')
+            self.sfx('pop')
         elif d['type']=='deco':
             self.sfx('pop')
 
