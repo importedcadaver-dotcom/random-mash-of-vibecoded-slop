@@ -23,3 +23,10 @@ Every workstream uses a clear label in its commit or pull request title:
 - Put each game in `games/<game-id>/`.
 - Give every game its own README.md, AGENTS.md, and game.json.
 - Keep saves, generated build output, and dependencies local to that game; do not check in personal saves or secrets.
+
+## Persistent identity and project memory
+
+- Start with [agent registry](docs/AGENT_REGISTRY.md) for current agent/project labels.
+- Mud Pie Masters continuity is documented in [its project memory](games/mud-pie-masters/PROJECT_MEMORY.md) and [agent identity](games/mud-pie-masters/AGENT_IDENTITY.md). This is **repository memory**, not automatic ChatGPT product Memory.
+- Every PR runs the always-on `agent-governance` check; see [branch protection setup](docs/BRANCH_PROTECTION_SETUP.md) for the separate GitHub admin-side enforcement still needed.
+- Never confuse a self-assigned agent nickname with a distinct authenticated GitHub user.
