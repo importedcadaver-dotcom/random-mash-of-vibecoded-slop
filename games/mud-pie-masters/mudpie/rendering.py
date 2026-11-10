@@ -25,9 +25,17 @@ class Painter:
         self.fonts = {}
 
     def font(self, size: int, bold: bool = False):
+        """Use readable antialiased UI type, not tiny Consolas glyphs.
+
+        The base canvas is 1280×720; 10–12px labels became difficult to read
+        in Windows screenshots and on a rescaled display. The minimum 14px
+        font provides consistent readable body text, with Georgian headings.
+        """
+        size = max(14, int(size))
         key = (size, bold)
         if key not in self.fonts:
-            self.fonts[key] = pygame.font.SysFont('georgia' if bold and size >= 24 else 'consolas', size, bold=bold)
+            face = 'georgia' if bold and size >= 24 else 'verdana'
+            self.fonts[key] = pygame.font.SysFont(face, size, bold=bold)
         return self.fonts[key]
 
     def text(self, surf, value, pos, size=24, color=INK, bold=False, center=False, max_w=None):
@@ -93,7 +101,11 @@ class Painter:
         if name not in self.images:
             return
         source = self.images[name]
-        target = pygame.transform.scale(source, (int(size[0]), int(size[1])))
+        # Bruno's outer ear sits uncomfortably near the legacy sprite bounds.
+        # Inset his expressions rather than cutting his ear at the panel edge.
+        if name in ('bruno','bruno_blink','bruno_cheer','bruno_sad'):
+            size = (int(size[0]*.92),int(size[1]*.92))
+        target = pygame.transform.scale(source, (max(1,int(size[0])),max(1,int(size[1]))))
         rect = target.get_rect(center=pos) if center else target.get_rect(topleft=pos)
         rect.move_ip(0, int(bounce))
         surf.blit(target, rect)
