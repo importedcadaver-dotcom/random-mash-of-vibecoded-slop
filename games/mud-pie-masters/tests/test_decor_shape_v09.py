@@ -57,12 +57,12 @@ def test_petal_stretch_and_flatten_are_visible_and_undoable(app):
     app.draw()
     anchor=_anchor(app,petal)
     crop=pygame.Rect(anchor[0]-52,anchor[1]-50,104,100)
-    before=pygame.image.tostring(app.canvas.subsurface(crop),"RGB")
+    before=pygame.image.tobytes(app.canvas.subsurface(crop),"RGB")
     drag(app,anchor,(anchor[0]+62,anchor[1]))
     assert petal.stretch_x>1.9
     assert petal.stretch_y==1.
     app.draw()
-    after=pygame.image.tostring(app.canvas.subsurface(crop),"RGB")
+    after=pygame.image.tobytes(app.canvas.subsurface(crop),"RGB")
     assert before!=after, "Petal stretching must change actual pixels."
     drag(app,anchor,(anchor[0],anchor[1]+35))
     assert petal.stretch_y<.7
