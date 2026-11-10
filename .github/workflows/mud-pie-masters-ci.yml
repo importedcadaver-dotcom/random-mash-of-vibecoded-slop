@@ -58,3 +58,17 @@ jobs:
           path: games/mud-pie-masters/qa-artifacts/runtime/
           if-no-files-found: warn
           retention-days: 14
+      - name: Complete all 48 contests in actual Pygame runtime
+        if: always()
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: python tools/full_campaign_runtime.py --output qa-artifacts/full-campaign
+      - name: Upload full campaign screenshots and audit JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mudpie-full-campaign-${{ matrix.os }}
+          path: games/mud-pie-masters/qa-artifacts/full-campaign/
+          if-no-files-found: error
+          retention-days: 30
