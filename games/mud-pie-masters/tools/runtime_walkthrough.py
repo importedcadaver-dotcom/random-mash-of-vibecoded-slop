@@ -206,8 +206,12 @@ class Walkthrough:
         self.drag((65, 406), (810, 509))  # Drop a tier beyond the supported base.
         self.require(g.pie.layers[-1].fallen and g.fall_animations,
                      "Unsupported mud hovered instead of starting a gravity fall")
+        for _ in range(8):
+            g.step_frame(1/60)
+        self.require(g.fall_animations and g.fall_animations[0]["elapsed"] > 0,
+                     "Gravity animation never advanced before screenshot")
         self.capture("unsupported_tier_falling")
-        for _ in range(35):
+        for _ in range(27):
             g.step_frame(1/60)
         self.require(not g.fall_animations, "Falling mud never reached the table")
         self.capture("fallen_mud_settled")
