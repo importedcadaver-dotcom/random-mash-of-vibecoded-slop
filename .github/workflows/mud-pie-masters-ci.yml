@@ -44,3 +44,16 @@ jobs:
           SDL_VIDEODRIVER: dummy
           SDL_AUDIODRIVER: dummy
         run: python tools/simulate_campaign.py
+      - name: SDL event-driven gameplay walkthrough and screenshots
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: python tools/runtime_walkthrough.py --output qa-artifacts/runtime
+      - name: Upload rendered runtime screenshots and input trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mudpie-runtime-${{ matrix.os }}
+          path: games/mud-pie-masters/qa-artifacts/runtime/
+          if-no-files-found: warn
+          retention-days: 14
