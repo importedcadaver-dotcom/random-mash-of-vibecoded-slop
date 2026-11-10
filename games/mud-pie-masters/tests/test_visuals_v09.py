@@ -27,9 +27,9 @@ def test_legacy_judges_replaced_with_distinct_art_from_sibling_visual_language(a
         output=app.paint.images[judge]
         legacy=pygame.image.load(str(ASSETS/f"{judge}.png")).convert_alpha()
         assert output.get_size()==legacy.get_size()
-        assert pygame.image.tostring(output,"RGBA")!=pygame.image.tostring(legacy,"RGBA")
+        assert pygame.image.tobytes(output,"RGBA")!=pygame.image.tobytes(legacy,"RGBA")
         assert output.get_at((0,0)).a==0
-    assert pygame.image.tostring(app.paint.images["petal"],"RGBA") != pygame.image.tostring(app.paint.images["fern"],"RGBA")
+    assert pygame.image.tobytes(app.paint.images["petal"],"RGBA") != pygame.image.tobytes(app.paint.images["fern"],"RGBA")
 
 
 def test_judge_cards_still_render_at_original_layout_coordinates(app,tmp_path):
