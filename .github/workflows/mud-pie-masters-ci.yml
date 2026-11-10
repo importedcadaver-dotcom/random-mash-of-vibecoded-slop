@@ -45,6 +45,7 @@ jobs:
           SDL_AUDIODRIVER: dummy
         run: python tools/simulate_campaign.py
       - name: SDL event-driven gameplay walkthrough and screenshots
+        if: always()  # Preserve screenshot diagnostics if earlier tests fail.
         env:
           SDL_VIDEODRIVER: dummy
           SDL_AUDIODRIVER: dummy
