@@ -9,7 +9,12 @@ from __future__ import annotations
 import argparse
 import json
 import time
+import sys
 from pathlib import Path
+
+# Works when invoked as python tools/full_campaign_runtime.py from game root.
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 from mudpie.campaign import STORY, SIDES, campaign_statistics
 from mudpie.save import load_game
