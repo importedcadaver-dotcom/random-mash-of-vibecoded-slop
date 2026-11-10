@@ -1460,11 +1460,18 @@ class Game:
             self.advance_presentation()
 
     def update(self, dt):
+        """Advance transient mud falls and settle any edits made during a fall."""
+        landed = False
         for anim in list(self.fall_animations):
             anim['elapsed'] += dt
             if anim['elapsed'] >= anim['duration']:
                 self.fall_animations.remove(anim)
                 self.sfx('splat')
+                landed = True
+        if landed and not self.fall_animations and self.scene == 'craft':
+            # A second drag/reshape may have removed support mid-animation.
+            # Defer evaluation until the final falling object's index is free.
+            self.settle_pie_support()
         self.timer+=dt
         self.toast_time=max(0,self.toast_time-dt)
         if self.mud_flecks:
