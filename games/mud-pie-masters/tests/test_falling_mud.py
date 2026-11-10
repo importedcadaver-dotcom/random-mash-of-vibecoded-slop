@@ -136,3 +136,16 @@ def test_real_stack_drag_outside_support_initiates_fall(game):
     gesture(game,(655,510),(810,510))
     assert game.pie.layers[1].fallen
     assert game.fall_animations
+
+
+def test_new_scoop_is_deferred_while_an_older_tier_is_falling(game):
+    gesture(game,(65,405),(655,553))
+    gesture(game,(65,405),(810,509))
+    assert len(game.fall_animations)==1
+    assert len(game.pie.layers)==2
+    gesture(game,(65,405),(655,508))
+    assert len(game.pie.layers)==2
+    assert "Wait" in game.toast
+    finish_fall(game)
+    gesture(game,(65,405),(655,508))
+    assert len(game.pie.layers)==3
