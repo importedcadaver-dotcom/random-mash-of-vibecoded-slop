@@ -303,6 +303,8 @@ class Game:
             if idx == 0 and not any(recent):
                 recent = [item.get('signature', '') for item in self.gallery]
             self.judgments.append(judge(entry, self.theme[2], recent, weather=self.mission.weather if self.mission else 'clear'))
+        # A crafting notification must not obscure the next scene's heading.
+        self.toast_time = 0
         self.scene = 'presentation'
         self.presentation_step = 0
         self.presentation_since = self.timer
@@ -320,11 +322,18 @@ class Game:
         self.events = events
         self.mission_medals = 0
         self.mission_checks = []
+        # Discard stale shaping hints on the results screen. A real chapter
+        # completion may still display its own fresh notification below.
+        self.toast_time = 0
         if self.mission:
             self.mission_medals, self.mission_checks = medals_for(
                 self.mission, self.pie, self.judgments[0].total)
+            previous_story_progress = self.campaign['next_story']
             self.campaign = record_result(self.campaign, self.mission, self.mission_medals)
-            if not self.mission.side and self.campaign['next_story'] % 6 == 0:
+            # Zero is divisible by six, but is NOT a chapter completion.
+            if (not self.mission.side and
+                    self.campaign['next_story'] > previous_story_progress and
+                    self.campaign['next_story'] % 6 == 0):
                 if self.campaign['next_story'] <= 24:
                     self.notify('Chapter complete! A new decoration color is unlocked.')
                 else:
@@ -481,7 +490,7 @@ class Game:
             medal=self.campaign['story_medals'].get(m.id,0)
             fill=(249,241,218) if unlocked else (211,207,193)
             self.paint.rect(self.canvas,(x,y,587,85),fill,14,(125,104,78),2)
-            mark=('★'*medal) if medal else ('NEXT' if unlocked else 'LOCKED')
+            mark=(f'{medal} STAR' + ('S' if medal != 1 else '')) if medal else ('NEXT' if unlocked else 'LOCKED')
             self.paint.text(self.canvas,f'{index+1:02d}. {m.title}',(x+12,y+7),19,DARK,bold=True,max_w=390)
             self.paint.text(self.canvas,mark,(x+490,y+10),17,(153,106,42),bold=True)
             self.paint.text(self.canvas,m.description,(x+12,y+34),14,INK,max_w=552)
@@ -493,7 +502,7 @@ class Game:
         for i,m in enumerate(SIDES[chapter*2:chapter*2+2]):
             medal=self.campaign['side_medals'].get(m.id,0)
             self.button((41+i*608,640,582,48),
-                        f"{'★'*medal or 'NEW'}  {m.title}",
+                        f"{str(medal) + ' STARS' if medal else 'NEW'}  {m.title}",
                         lambda mid=m.id:self.begin_round(mid),small=True,
                         disabled=not available_side(self.campaign,m))
 
@@ -649,15 +658,22 @@ class Game:
         if self.mission and self.mission.weather != 'clear':
             self.paint.text(self.canvas,f'Weather: {self.mission.weather.upper()}',
                             (1055,313),12,(150,86,64),bold=True)
-        self.paint.text(self.canvas,'TODAY’S CHALLENGE' if self.mission else 'CREATIVE MEADOW',
-                        (1055,335),17,DARK,bold=True)
+        if self.mission:
+            self.button((1054,329,190,27),'VIEW ALL GOALS',
+                        lambda:self.show_overlay('goals'),small=True)
+        else:
+            self.paint.text(self.canvas,'CREATIVE MEADOW',(1055,335),17,DARK,bold=True)
         if self.mission:
             for i,goal in enumerate(self.mission.goals[:3]):
                 value, ok = goal_progress(self.pie,goal, self.mission.weather)
-                self.paint.text(self.canvas,('✓ ' if ok else '○ ')+goal.label,
-                                (1052,357+i*25),12,(54,130,72) if ok else INK,max_w=133)
+                # One complete objective per line with progress directly underneath.
+                # The old 133-pixel label was clipped to 'At least 1 mud t…'
+                # and concealed essential rules from new players.
+                y = 356 + i * 24
+                self.paint.text(self.canvas,('OK ' if ok else '- ')+goal.label,
+                                (1055,y),10,(54,130,72) if ok else INK,max_w=197)
                 self.paint.text(self.canvas,f'{value:g}/{goal.target:g}',
-                                (1197,357+i*25),11,(54,130,72) if ok else INK,max_w=48)
+                                (1197,y+12),10,(54,130,72) if ok else INK,max_w=50)
         else:
             self.paint.wrap(self.canvas,'Build anything! Nothing is graded.',1055,360,183,15)
         self.button((1054,431,190,34),
@@ -762,7 +778,7 @@ class Game:
         winner=self.last_winner
         self._heading(f'And the winner is… {winner.upper()}!',f'{self.theme[0]} · Round {self.round_no-1} results')
         if self.mission:
-            medal_message=f'Challenge stars: {"★"*self.mission_medals}{"☆"*(3-self.mission_medals)}'
+            medal_message=f'Challenge stars: {self.mission_medals} / 3'
             self.paint.rect(self.canvas,(840,372,398,32),PAPER,11,(110,95,71),1)
             self.paint.text(self.canvas,medal_message,(854,380),17,DARK,bold=True)
         for i,name in enumerate(self.names):
@@ -778,7 +794,7 @@ class Game:
             self.paint.text(self.canvas,name,(x+22,302),24,DARK,bold=True)
             self.paint.text(self.canvas,f'{self.judgments[i].total:.1f} pts',(x+190,304),24,DARK,bold=True)
             if iswinner:
-                self.paint.text(self.canvas,'FOREST CHAMPION ★',(x+24,345),19,(137,100,43),bold=True)
+                self.paint.text(self.canvas,'FOREST CHAMPION',(x+24,345),19,(137,100,43),bold=True)
             self.button((x+270,341,97,37),'INSPECT',lambda j=i:setattr(self,'inspected',j),
                         small=True,active=self.inspected==i)
         evaluation=self.judgments[self.inspected]
@@ -797,9 +813,8 @@ class Game:
             y=468+j*51
             self.paint.text(self.canvas,f'{v.name} · {v.score:.1f}',(861,y),17,INK,bold=True)
             self.paint.text(self.canvas,v.comment,(861,y+22),14,(94,88,70),max_w=350)
-        if self.events:
-            event=self.events[1 if self.inspected==2 else 0]
-            self.paint.text(self.canvas,event,(860,628),13,(110,78,60),max_w=349)
+        self.button((859,626,359,36),'FULL JUDGE COMMENTS',
+                    lambda:self.show_overlay('judge_notes'),small=True)
         retry_required=(self.mission is not None and not self.mission.side
                         and self.mission_medals==1 and
                         STORY.index(self.mission)==self.campaign['next_story'])
@@ -918,7 +933,7 @@ class Game:
             if self.mission:
                 self.paint.text(self.canvas,self.mission.title,(260,169),25,INK,bold=True)
                 self.paint.text(self.canvas,
-                    f'Stars: {"★"*self.mission_medals}{"☆"*(3-self.mission_medals)}   ·   Three-star target: {self.mission.target} points',
+                    f'Stars: {self.mission_medals}/3   ·   Three-star target: {self.mission.target} points',
                     (260,206),20,DARK,bold=True)
                 for i,(goal,value,ok) in enumerate(self.mission_checks):
                     self.paint.rect(self.canvas,(254,252+i*57,766,48),
@@ -944,6 +959,39 @@ class Game:
             self.paint.wrap(self.canvas,ch.daisy_line,665,464,346,18)
             self._overlay_button((256,558,355,58),'ENCOURAGE MY SIBLINGS',lambda:self.choose_chapter(True),True)
             self._overlay_button((626,558,384,58),'CHALLENGE THEM TO COMPETE',lambda:self.choose_chapter(False))
+        elif self.overlay=='goals':
+            self.paint.rect(self.canvas,(209,93,862,535),CREAM,25,(94,77,52),4)
+            self.paint.text(self.canvas,'TODAY’S CRAFTING GOALS',(249,123),31,DARK,bold=True)
+            if self.mission:
+                self.paint.text(self.canvas,self.mission.title,(254,173),24,DARK,bold=True)
+                self.paint.wrap(self.canvas,self.mission.description,254,210,754,18)
+                for i,goal in enumerate(self.mission.goals):
+                    value,ok=goal_progress(self.pie,goal,self.mission.weather)
+                    y=277+i*79
+                    self.paint.rect(self.canvas,(251,y,774,69),
+                                    (187,205,158) if ok else (230,215,183),5)
+                    self.paint.text(self.canvas,('COMPLETE' if ok else 'IN PROGRESS')+
+                                    ' — '+goal.label,(269,y+9),19,DARK,bold=True,max_w=724)
+                    self.paint.text(self.canvas,f'Current: {value:g} / required: {goal.target:g}',
+                                    (269,y+37),16,INK,max_w=705)
+            self._overlay_button((423,549,435,55),'BACK TO MY WORKBENCH',
+                                 self.close_overlay,True)
+        elif self.overlay=='judge_notes':
+            self.paint.rect(self.canvas,(202,78,877,571),CREAM,25,(94,77,52),4)
+            name=self.names[self.inspected]
+            self.paint.text(self.canvas,f'WHAT THE JUDGES SAID ABOUT {name.upper()}',
+                            (239,109),27,DARK,bold=True,max_w=807)
+            evaluation=self.judgments[self.inspected]
+            for i,verdict in enumerate(evaluation.verdicts):
+                y=163+i*103
+                self.paint.rect(self.canvas,(231,y,819,95),PAPER,8,(146,124,86),1)
+                self.paint.text(self.canvas,f'{verdict.name} · {verdict.score:.1f} points',
+                                (250,y+10),20,DARK,bold=True)
+                self.paint.wrap(self.canvas,verdict.comment,251,y+40,779,17)
+            if self.events:
+                note=self.events[1 if self.inspected==2 else 0]
+                self.paint.wrap(self.canvas,'Sibling moment: '+note,247,487,776,16)
+            self._overlay_button((430,576,421,54),'BACK TO SCORES',self.close_overlay,True)
         elif self.overlay=='reset':
             self.paint.rect(self.canvas,(358,230,564,263),CREAM,25,(96,82,55),4)
             self.paint.text(self.canvas,'START OVER?',(399,268),35,DARK,bold=True)
@@ -995,8 +1043,14 @@ class Game:
         elif self.scene=='campaign': self.draw_campaign()
         elif self.scene=='epilogue': self.draw_epilogue()
         if self.toast_time>0:
-            self.paint.rect(self.canvas,(295,32,668,50),(224,203,153),15,(125,95,63),2,alpha=250)
-            self.paint.text(self.canvas,self.toast,(630,57),17,INK,bold=True,center=True,max_w=628)
+            # Avoid covering the workbench title, which formerly spent much
+            # of crafting gameplay hidden behind long notifications.
+            if self.scene == 'craft' and not self.overlay:
+                r, center, max_w = (322, 166, 702, 43), (673, 187), 665
+            else:
+                r, center, max_w = (295, 32, 668, 50), (630, 57), 628
+            self.paint.rect(self.canvas,r,(224,203,153),15,(125,95,63),2,alpha=250)
+            self.paint.text(self.canvas,self.toast,center,16,INK,bold=True,center=True,max_w=max_w)
         if self.overlay:
             self.buttons=[]
             self.draw_overlay()
@@ -1253,26 +1307,37 @@ class Game:
                 self.collapse_sound_played=True
                 self.sfx('splat')
 
+    def handle_event(self, event):
+        """Handle one SDL event for both the live loop and automated input tests.
+
+        Bots must send pygame events through this dispatcher rather than calling
+        on_down/on_key directly. This keeps resize and letterbox conversion tested.
+        """
+        if event.type == pygame.QUIT:
+            self.running = False
+        elif event.type == pygame.MOUSEMOTION:
+            self.on_motion(self.to_logical(event.pos))
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            self.on_down(self.to_logical(event.pos), event.button)
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self.on_up(self.to_logical(event.pos), event.button)
+        elif event.type == pygame.KEYDOWN:
+            self.on_key(event)
+        elif event.type == pygame.VIDEORESIZE and not self.fullscreen:
+            if event.w >= 600 and event.h >= 380:
+                self.display = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+
+    def step_frame(self, dt: float):
+        """Advance a single real game-loop frame, processing queued SDL events."""
+        self.update(max(0, min(float(dt), .05)))
+        for event in pygame.event.get():
+            self.handle_event(event)
+        self.draw()
+
     def run(self):
-        clock=pygame.time.Clock()
+        clock = pygame.time.Clock()
         self.draw()  # Prime button hit-targets before the first event.
         while self.running:
-            dt=min(clock.tick(60)/1000, .05)
-            self.update(dt)
-            for event in pygame.event.get():
-                if event.type==pygame.QUIT:
-                    self.running=False
-                elif event.type==pygame.MOUSEMOTION:
-                    self.on_motion(self.to_logical(event.pos))
-                elif event.type==pygame.MOUSEBUTTONDOWN:
-                    self.on_down(self.to_logical(event.pos),event.button)
-                elif event.type==pygame.MOUSEBUTTONUP:
-                    self.on_up(self.to_logical(event.pos),event.button)
-                elif event.type==pygame.KEYDOWN:
-                    self.on_key(event)
-                elif event.type==pygame.VIDEORESIZE and not self.fullscreen:
-                    if event.w>=600 and event.h>=380:
-                        self.display=pygame.display.set_mode((event.w,event.h),pygame.RESIZABLE)
-            self.draw()
+            self.step_frame(clock.tick(60) / 1000)
         self.save()
         pygame.quit()

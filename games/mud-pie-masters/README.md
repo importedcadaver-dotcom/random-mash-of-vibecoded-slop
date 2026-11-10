@@ -1,14 +1,14 @@
-# MUD PIE MASTERS · Gameplay Rescue Edition v0.5.0
+# MUD PIE MASTERS · v0.6 Automated Gameplay Reliability Candidate
 
 A fully offline Windows desktop crafting/competition game for Python 3.12 and **Pygame Community Edition**. Play as a baby brown bear competing with sibling cubs Bruno and Daisy. Nothing in the mud-pie contest is edible.
 
 ## Release status (read before playing)
 
-**v0.5.0 is a redesigned gameplay-and-balance candidate with v0.4 provisional baby-cub artwork, NOT a verified two-hour release.** It has 36 unique main story contests, 12 optional woodland commissions, six chapters, chapter dialogue choices, scores, medals, weather challenges, a small unlock system, a free-build mode, and a finale. There are no artificial countdowns, stamina waits, or paywalls.
+**v0.6.0-dev is an automated-runtime-tested candidate retaining the v0.5 gameplay redesign with v0.4 provisional baby-cub artwork, NOT a verified two-hour release.** It has 36 unique main story contests, 12 optional woodland commissions, six chapters, chapter dialogue choices, scores, medals, weather challenges, a small unlock system, a free-build mode, and a finale. There are no artificial countdowns, stamina waits, or paywalls.
 
 **Content target:** at least two hours of meaningful first-time gameplay for a typical player who completes the story and commissions. The content plan would reach 120 minutes at an **assumed** average of 2.5 minutes per 48 contests; this is only an illustrative planning assumption, **not a measured completion time**. Actual duration varies based on skill, retry attempts and design exploration. A human playthrough on Windows is still required before promising a two-hour experience.
 
-The project was built in a sandbox that cannot install pygame-ce or launch a Windows window. Python logic tests ran successfully; the graphical interaction smoke tests are shipped but need execution on your Windows PC. No genuine gameplay FPS, sound playback, or real input latency was measured here. See `QA_REPORT.md`, `ART_DIRECTION.md` and `GAMEPLAY_TARGET.md`.
+The original game was built in a sandbox; **v0.6 has now run actual Pygame rendering and SDL event tests in GitHub Actions on Windows and Linux under dummy SDL video/audio**, with screenshot artifacts. This is not a human Windows desktop playtest, audio verification, FPS benchmark, or a certified two-hour experience. See `QA_RUNTIME_v0.6.md`, `QA_REPORT.md`, `ART_DIRECTION.md`, and `GAMEPLAY_TARGET.md`.
 
 ## Install/update on Windows
 
@@ -166,3 +166,17 @@ powershell -ExecutionPolicy Bypass -File .\verify_no_play.ps1
 The game itself is launched separately with `play.bat` **only when you choose**.
 Windows execution, a measured two-hour run and actual subjective fun are still
 release gates. As requested, this version remains **pre-release**.
+
+## v0.6 automated interaction QA (without playing)
+
+From the game folder, run:
+
+```powershell
+python -m pytest -q
+python tools/simulate_campaign.py
+$env:SDL_VIDEODRIVER="dummy"
+$env:SDL_AUDIODRIVER="dummy"
+python tools/runtime_walkthrough.py --output qa-artifacts/runtime
+```
+
+The event-driven bot shares the game's real SDL event dispatcher, completes the first story challenge through UI events, exercises undo/redo and sibling interactions, saves a free-build entry, and tests a resized letterboxed window. Its 20 screenshots per platform and JSON trace are uploaded by GitHub Actions. This automated path does **not** replace a physical Windows playtest or provide evidence of two enjoyable hours. See [v0.6 runtime QA](QA_RUNTIME_v0.6.md).

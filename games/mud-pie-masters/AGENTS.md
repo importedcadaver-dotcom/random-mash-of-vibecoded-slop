@@ -37,3 +37,7 @@ Run `python -m pytest -q` and `python tools/simulate_campaign.py` from this game
 ## Current agent identity / context
 
 The current chat's assistant alias is **Mossbyte — ChatGPT GPT-6**, project-agent ID `MPM-MOSSBYTE-GPT6-001`, workstream alias `MPM-CHAT-20261109-A`. For a full and dated handoff, read [`AGENT_IDENTITY.md`](AGENT_IDENTITY.md) and [`PROJECT_MEMORY.md`](PROJECT_MEMORY.md). These are public **GitHub continuity records**, not an actual GitHub bot or guaranteed ChatGPT account memory. A later agent must use its own session identifier and may update memory only with supported evidence.
+
+## v0.6 runtime reliability gate
+
+Use `python tools/runtime_walkthrough.py --output qa-artifacts/runtime` (with SDL dummy video/audio drivers) as well as pytest and campaign simulation for future gameplay changes. The bot injects events through production `Game.step_frame()`, captures real Pygame frames, and checks first-mission progression and free-build saving. Check `QA_RUNTIME_v0.6.md` before interpreting results. Screenshots do not constitute an OS-level or human playtest. Preserve `game.json` gameplay-hours-verified=false until observed human playtime justifies changing it.

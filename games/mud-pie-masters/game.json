@@ -2,9 +2,11 @@
   "id": "mud-pie-masters",
   "name": "Mud Pie Masters",
   "engine": "Python 3.12 / pygame-ce",
-  "platform": ["Windows"],
-  "version": "0.5.0",
-  "status": "source-imported",
+  "platform": [
+    "Windows"
+  ],
+  "version": "0.6.0-dev",
+  "status": "automated-runtime-tested",
   "release_status": "pre-release-candidate",
   "offline": true,
   "paid_dependencies": false,
@@ -12,5 +14,6 @@
   "gameplay_hours_verified": false,
   "agent_contribution": "ChatGPT GPT-6 / mud-pie-masters / import-v0.5",
   "primary_entrypoint": "main.py",
-  "test_command": "python -m pytest -q"
+  "test_command": "python -m pytest -q",
+  "automation_qa": "SDL event-driven Windows/Linux CI, 20 screenshot walkthrough frames per OS"
 }
