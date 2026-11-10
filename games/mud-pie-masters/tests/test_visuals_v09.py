@@ -53,3 +53,26 @@ def test_ui_font_minimum_size_and_bruno_no_edge_hugging(app):
     daisy=app.paint.image(surface,"daisy",(200,190),(200,230),center=True)
     assert bruno.width < daisy.width
     assert bruno.height < daisy.height
+
+
+def test_clearing_notifications_do_not_cover_the_round_title(app,monkeypatch):
+    """The old global toast obscured the round heading in actual screenshots."""
+    app.begin_round()
+    app.choose_chapter(False)
+    app.notify("Bruno grins at your challenge; Daisy looks determined.")
+    texts=[]
+    rects=[]
+    paint_text=app.paint.text
+    paint_rect=app.paint.rect
+    def monitor_text(surface,value,*args,**kwargs):
+        texts.append(str(value))
+        return paint_text(surface,value,*args,**kwargs)
+    def monitor_rect(surface,rect,*args,**kwargs):
+        rects.append(tuple(rect))
+        return paint_rect(surface,rect,*args,**kwargs)
+    monkeypatch.setattr(app.paint,"text",monitor_text)
+    monkeypatch.setattr(app.paint,"rect",monitor_rect)
+    app.draw()
+    assert any("Round 1" in t for t in texts)
+    assert any("Bruno grins" in t for t in texts)
+    assert (295,32,668,50) not in rects
