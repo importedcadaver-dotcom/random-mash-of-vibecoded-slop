@@ -323,8 +323,12 @@ class Game:
         if self.mission:
             self.mission_medals, self.mission_checks = medals_for(
                 self.mission, self.pie, self.judgments[0].total)
+            previous_story_progress = self.campaign['next_story']
             self.campaign = record_result(self.campaign, self.mission, self.mission_medals)
-            if not self.mission.side and self.campaign['next_story'] % 6 == 0:
+            # Zero is divisible by six, but is NOT a chapter completion.
+            if (not self.mission.side and
+                    self.campaign['next_story'] > previous_story_progress and
+                    self.campaign['next_story'] % 6 == 0):
                 if self.campaign['next_story'] <= 24:
                     self.notify('Chapter complete! A new decoration color is unlocked.')
                 else:
@@ -481,7 +485,7 @@ class Game:
             medal=self.campaign['story_medals'].get(m.id,0)
             fill=(249,241,218) if unlocked else (211,207,193)
             self.paint.rect(self.canvas,(x,y,587,85),fill,14,(125,104,78),2)
-            mark=('★'*medal) if medal else ('NEXT' if unlocked else 'LOCKED')
+            mark=(f'{medal} STAR' + ('S' if medal != 1 else '')) if medal else ('NEXT' if unlocked else 'LOCKED')
             self.paint.text(self.canvas,f'{index+1:02d}. {m.title}',(x+12,y+7),19,DARK,bold=True,max_w=390)
             self.paint.text(self.canvas,mark,(x+490,y+10),17,(153,106,42),bold=True)
             self.paint.text(self.canvas,m.description,(x+12,y+34),14,INK,max_w=552)
@@ -493,7 +497,7 @@ class Game:
         for i,m in enumerate(SIDES[chapter*2:chapter*2+2]):
             medal=self.campaign['side_medals'].get(m.id,0)
             self.button((41+i*608,640,582,48),
-                        f"{'★'*medal or 'NEW'}  {m.title}",
+                        f"{str(medal) + ' STARS' if medal else 'NEW'}  {m.title}",
                         lambda mid=m.id:self.begin_round(mid),small=True,
                         disabled=not available_side(self.campaign,m))
 
@@ -654,10 +658,14 @@ class Game:
         if self.mission:
             for i,goal in enumerate(self.mission.goals[:3]):
                 value, ok = goal_progress(self.pie,goal, self.mission.weather)
-                self.paint.text(self.canvas,('✓ ' if ok else '○ ')+goal.label,
-                                (1052,357+i*25),12,(54,130,72) if ok else INK,max_w=133)
+                # One complete objective per line with progress directly underneath.
+                # The old 133-pixel label was clipped to 'At least 1 mud t…'
+                # and concealed essential rules from new players.
+                y = 356 + i * 24
+                self.paint.text(self.canvas,('OK ' if ok else '- ')+goal.label,
+                                (1055,y),11,(54,130,72) if ok else INK,max_w=187)
                 self.paint.text(self.canvas,f'{value:g}/{goal.target:g}',
-                                (1197,357+i*25),11,(54,130,72) if ok else INK,max_w=48)
+                                (1197,y+12),10,(54,130,72) if ok else INK,max_w=50)
         else:
             self.paint.wrap(self.canvas,'Build anything! Nothing is graded.',1055,360,183,15)
         self.button((1054,431,190,34),
@@ -762,7 +770,7 @@ class Game:
         winner=self.last_winner
         self._heading(f'And the winner is… {winner.upper()}!',f'{self.theme[0]} · Round {self.round_no-1} results')
         if self.mission:
-            medal_message=f'Challenge stars: {"★"*self.mission_medals}{"☆"*(3-self.mission_medals)}'
+            medal_message=f'Challenge stars: {self.mission_medals} / 3'
             self.paint.rect(self.canvas,(840,372,398,32),PAPER,11,(110,95,71),1)
             self.paint.text(self.canvas,medal_message,(854,380),17,DARK,bold=True)
         for i,name in enumerate(self.names):
@@ -778,7 +786,7 @@ class Game:
             self.paint.text(self.canvas,name,(x+22,302),24,DARK,bold=True)
             self.paint.text(self.canvas,f'{self.judgments[i].total:.1f} pts',(x+190,304),24,DARK,bold=True)
             if iswinner:
-                self.paint.text(self.canvas,'FOREST CHAMPION ★',(x+24,345),19,(137,100,43),bold=True)
+                self.paint.text(self.canvas,'FOREST CHAMPION',(x+24,345),19,(137,100,43),bold=True)
             self.button((x+270,341,97,37),'INSPECT',lambda j=i:setattr(self,'inspected',j),
                         small=True,active=self.inspected==i)
         evaluation=self.judgments[self.inspected]
@@ -918,7 +926,7 @@ class Game:
             if self.mission:
                 self.paint.text(self.canvas,self.mission.title,(260,169),25,INK,bold=True)
                 self.paint.text(self.canvas,
-                    f'Stars: {"★"*self.mission_medals}{"☆"*(3-self.mission_medals)}   ·   Three-star target: {self.mission.target} points',
+                    f'Stars: {self.mission_medals}/3   ·   Three-star target: {self.mission.target} points',
                     (260,206),20,DARK,bold=True)
                 for i,(goal,value,ok) in enumerate(self.mission_checks):
                     self.paint.rect(self.canvas,(254,252+i*57,766,48),
@@ -995,8 +1003,14 @@ class Game:
         elif self.scene=='campaign': self.draw_campaign()
         elif self.scene=='epilogue': self.draw_epilogue()
         if self.toast_time>0:
-            self.paint.rect(self.canvas,(295,32,668,50),(224,203,153),15,(125,95,63),2,alpha=250)
-            self.paint.text(self.canvas,self.toast,(630,57),17,INK,bold=True,center=True,max_w=628)
+            # Avoid covering the workbench title, which formerly spent much
+            # of crafting gameplay hidden behind long notifications.
+            if self.scene == 'craft' and not self.overlay:
+                r, center, max_w = (322, 166, 702, 43), (673, 187), 665
+            else:
+                r, center, max_w = (295, 32, 668, 50), (630, 57), 628
+            self.paint.rect(self.canvas,r,(224,203,153),15,(125,95,63),2,alpha=250)
+            self.paint.text(self.canvas,self.toast,center,16,INK,bold=True,center=True,max_w=max_w)
         if self.overlay:
             self.buttons=[]
             self.draw_overlay()
