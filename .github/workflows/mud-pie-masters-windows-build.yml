@@ -1,0 +1,72 @@
+name: Mud Pie Masters - Windows Game Package
+
+on:
+  pull_request:
+    paths:
+      - "games/mud-pie-masters/**"
+      - ".github/workflows/mud-pie-masters-windows-build.yml"
+  push:
+    branches: [main]
+    paths:
+      - "games/mud-pie-masters/**"
+      - ".github/workflows/mud-pie-masters-windows-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  packaged-windows-smoke:
+    name: Packaged Windows executable smoke
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: games/mud-pie-masters
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Build actual Windows executable folder
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name MudPieMasters --add-data "assets;assets" main.py
+          if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed" }
+          if (-not (Test-Path "dist/MudPieMasters/MudPieMasters.exe")) { throw "Exe missing" }
+      - name: Execute packaged EXE with dummy SDL
+        shell: pwsh
+        run: |
+          & "dist/MudPieMasters/MudPieMasters.exe" --qa-smoke
+          if ($LASTEXITCODE -ne 0) { throw "Built exe smoke test failed ($LASTEXITCODE)" }
+      - name: Mark artifact as unverified pre-release
+        shell: pwsh
+        run: |
+          @'
+          MUD PIE MASTERS — WINDOWS PRE-RELEASE QA BUILD
+          ************************************************
+          This was built on GitHub Actions Windows and tested by launching the
+          actual EXE in automated headless SDL smoke mode.
+          
+          IMPORTANT: The full two hours of enjoyable human gameplay have NOT
+          been verified. This is NOT a final release.
+          
+          To run:
+          1. Unzip the whole folder (keep _internal beside MudPieMasters.exe).
+          2. Double-click MudPieMasters.exe.
+          3. Windows SmartScreen may warn about unsigned personal software.
+             Verify it comes from your GitHub project before allowing it.
+          4. Your game data is stored under your user profile, not the EXE folder.
+          
+          No separate Python installation required for this executable.
+          Do not redistribute as a certified final release.
+          '@ | Set-Content -Path "dist/MudPieMasters/README_FIRST.txt"
+      - name: Upload standalone Windows folder
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MudPieMasters-Windows-PreRelease
+          path: games/mud-pie-masters/dist/MudPieMasters/
+          if-no-files-found: error
+          retention-days: 30
