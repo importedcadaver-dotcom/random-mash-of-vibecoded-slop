@@ -203,6 +203,14 @@ class Walkthrough:
         self.click(201, 546)
         self.require(g.scene == "craft" and g.mode == "free", "Free-build entry failed")
         self.drag((65, 406), (658, 555))
+        self.drag((65, 406), (810, 509))  # Drop a tier beyond the supported base.
+        self.require(g.pie.layers[-1].fallen and g.fall_animations,
+                     "Unsupported mud hovered instead of starting a gravity fall")
+        self.capture("unsupported_tier_falling")
+        for _ in range(35):
+            g.step_frame(1/60)
+        self.require(not g.fall_animations, "Falling mud never reached the table")
+        self.capture("fallen_mud_settled")
         self.click(1143, 39)
         self.require(g.scene == "gallery" and g.gallery[-1].get("free"),
                      "Free-build save/gallery failed")
