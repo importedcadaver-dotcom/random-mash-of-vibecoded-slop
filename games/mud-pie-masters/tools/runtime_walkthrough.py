@@ -150,6 +150,17 @@ class Walkthrough:
             self.drag((65, kind_y), pos)
         self.require(len(g.pie.decorations) >= 3, "Decorations failed to attach")
         self.capture("decorated_workbench")
+        self.click(1134, 448)
+        self.require(g.overlay == "colors", "Color picker did not open")
+        self.capture("color_swatch_picker")
+        self.click(457, 355)
+        self.require(g.overlay is None and g.color_variant == 1,
+                     "Selecting an explicit color swatch failed")
+        angle_before = g.pie.decorations[-1].angle
+        self.click(1134, 542)
+        self.require(g.pie.decorations[-1].angle == (angle_before+30)%360,
+                     "Visible ROTATE LAST button did not rotate a decoration")
+        self.capture("rotate_last_button")
         self.click(1135, 343)
         self.require(g.overlay == "goals", "Full crafting-goals panel did not open")
         self.capture("full_crafting_goals")
