@@ -1,16 +1,15 @@
 ## Agent attribution and scope
 
-**Agent:** Mossbyte
-**Model:** ChatGPT GPT-6
-**Game:** mud-pie-masters
-**Workstream ID:** MPM-CHAT-20261109-A
-**Files owned:** games/mud-pie-masters/ and coordinated shared documentation
-**Shared-file coordination:** owner-requested
-**Tests performed:** Documentation-only changes; Python governance script validated in CI (update this field to actual result)
-**Known gaps:** GitHub ruleset setup requires owner administration; game playtime remains unverified
+**Agent:** <agent nickname or name>
+**Model:** <actual model/version for this session>
+**Game:** <game slug, or repository-infrastructure>
+**Workstream ID:** <unique session or task label>
+**Files owned:** <owned paths and file responsibilities>
+**Shared-file coordination:** <owner-requested / coordinated / not-needed>
+**Tests performed:** <actual command and results, or explicitly not run>
+**Known gaps:** <unverified steps, or none>
 
-> Replace all example values with the actual agent, model, game, workstream, scope, test evidence and gaps for THIS PR. This template's example identity must not be reused blindly.
-> For a shared-only PR, use Game: repository-infrastructure and Shared-file coordination: coordinated.
+> Replace ALL bracketed fields. Names label contributions; they are not separate GitHub accounts. One PR should normally touch only one game's directory.
 
 ## Implementation
 
@@ -18,10 +17,10 @@ Describe changes and affected file paths. Do not claim other agents' contributio
 
 ## Verification
 
-- [ ] PR fields identify the actual agent and workstream
-- [ ] Exact executed test commands, environment, and results are reported
-- [ ] Only intended game(s) or explicitly coordinated shared files changed
+- [ ] Agent identity and scope are accurate
+- [ ] Actual test commands/results and environment are listed
+- [ ] Only intended game(s) or coordinated shared files changed
 - [ ] No secrets, dependencies, caches, or personal saves committed
-- [ ] Any UI/audio/Windows/manual playtesting is stated as confirmed or still missing
+- [ ] Manual Windows/audio/UI and two-hour playtime validation are reported honestly when relevant
 
 **Release status:** docs-only / candidate / validated
