@@ -52,7 +52,9 @@ function dismissWelcome(doc){click(doc,'[data-dismiss]','dismiss','')}
   const {document,store}=newGame();dismissWelcome(document);
   click(document,'[data-page]','page','build');
   click(document,'[data-select-build]','selectBuild','berry');
-  assert.match(document.nodes['#view'].innerHTML,/Tap an empty plot to place/);
+  assert.match(document.nodes['#view'].innerHTML,/Tap an open meadow plot/);
+  assert.match(document.nodes['#view'].innerHTML,/class="village-svg"/);
+  assert.match(document.nodes['#view'].innerHTML,/ATTACK!/);
   click(document,'[data-cell]','cell','0,1');
   let data=saved(store),patches=data.buildings.filter(b=>b.type==='berry');
   assert.equal(patches.length,2,'new producer placed on an empty plot');
