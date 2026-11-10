@@ -457,17 +457,24 @@ class Game:
             self.buttons.append((rect, callback))
 
     def _heading(self, title, subtitle=None):
+        """Draw a persistent title with transient messages in its subtitle slot.
+
+        The old global toast sat over the title on clearing/results scenes.
+        Reusing the subtitle line keeps the heading and content unobstructed.
+        """
         self.paint.rect(self.canvas, (0, 0, 1280, 94), (31, 52, 46), 0, alpha=251)
         pygame.draw.line(self.canvas, (176, 145, 90), (0,93), (1280,93), 3)
         self.paint.text(self.canvas, title, (38, 15), 35, CREAM, bold=True, max_w=990)
+        if self.toast_time > 0 and self.scene not in ('craft', 'title'):
+            subtitle = self.toast
         if subtitle:
             self.paint.text(self.canvas, subtitle, (41, 63), 16, (212, 198, 160), max_w=1180)
 
     def _sprite(self, name, center, size, bounce=True, expression=None):
-        """Draw a real expression sprite for cubs; preserve existing judge assets.
+        """Draw original expressive cubs or matching forest-judge portraits.
 
-        Expressions share the same bounding box, so hitboxes, letterboxing and
-        composition stay stable. Reduced-motion also disables idle blinking.
+        Judge art is compiled by Painter from matching cub silhouettes.
+        Reduced-motion disables idle blinking; hitboxes remain unaffected.
         """
         key = 'player' if name.lower() == 'you' else name.lower()
         if key in ('player', 'bruno', 'daisy'):
@@ -1207,9 +1214,9 @@ class Game:
         elif self.scene=='gallery': self.draw_gallery()
         elif self.scene=='campaign': self.draw_campaign()
         elif self.scene=='epilogue': self.draw_epilogue()
-        if self.toast_time>0:
-            # Avoid covering the workbench title, which formerly spent much
-            # of crafting gameplay hidden behind long notifications.
+        if self.toast_time>0 and self.scene in ('craft', 'title'):
+            # Other scenes put notifications in the subtitle slot instead of
+            # covering their title; workbench/title keep their safe placards.
             if self.scene == 'craft' and not self.overlay:
                 r, center, max_w = (322, 166, 702, 43), (673, 187), 665
             else:
