@@ -22,7 +22,62 @@ MUD = (91, 61, 49)
 class Painter:
     def __init__(self):
         self.images = {p.stem: pygame.image.load(str(p)).convert_alpha() for p in ASSETS.glob('*.png')}
+        self._make_judges_match_cubs()
         self.fonts = {}
+
+    def _make_judges_match_cubs(self):
+        """Replace old teddy-bear judge portraits with distinctive forest bears.
+
+        Palette-swapped pixel-art cub silhouettes match the original siblings'
+        anatomy and drawing technique. Judge-only accessories make each
+        character recognizable without external art files or extra dependencies.
+        The original PNG assets are kept as reproducible source fallbacks.
+        """
+        schemes = {
+            'petal': ('daisy', {
+                '#cb955f':'#ae8253', '#f0ba80':'#d9af78',
+                '#9c6646':'#765537', '#ffe0a8':'#efc994',
+                '#9b77a7':'#7d7961', '#e6c6df':'#c7b78f'
+            }),
+            'boulder': ('bruno', {
+                '#925b3b':'#746252', '#c28a5b':'#9e8a75',
+                '#69422e':'#51443e', '#d6a071':'#c9ad88',
+                '#466b76':'#575b61', '#a1c5c0':'#b6b2a5'
+            }),
+            'fern': ('player', {
+                '#b9784a':'#98724d', '#de9c68':'#bd9969',
+                '#8a5339':'#6f553d', '#efbf87':'#e7c394',
+                '#a94c42':'#426e54', '#e19375':'#85a874'
+            }),
+        }
+        for judge,(source,recolors) in schemes.items():
+            if source not in self.images:
+                continue
+            image=self.images[source].copy()
+            pixels=pygame.PixelArray(image)
+            for original,replacement in recolors.items():
+                pixels.replace(pygame.Color(original), pygame.Color(replacement))
+            del pixels
+            # 300×360 artwork uses big readable, pixel-aligned accessories.
+            if judge=='petal':
+                for cx,cy in ((114,99),(151,82),(188,98)):
+                    pygame.draw.circle(image,(63,73,55),(cx,cy),17)
+                    for ox,oy in ((-7,0),(7,0),(0,-7),(0,7)):
+                        pygame.draw.circle(image,(213,141,146),(cx+ox,cy+oy),7)
+                    pygame.draw.circle(image,(245,215,136),(cx,cy),6)
+            elif judge=='boulder':
+                pygame.draw.line(image,(61,52,47),(80,197),(94,213),5)
+                pygame.draw.line(image,(201,185,165),(84,197),(97,209),2)
+                pygame.draw.polygon(image,(66,66,68),
+                                    ((151,283),(168,267),(188,276),(181,294),(161,299)))
+                pygame.draw.line(image,(191,185,161),(158,284),(183,284),3)
+            else:
+                pygame.draw.polygon(image,(52,86,62),
+                                    ((201,89),(251,62),(231,113),(208,118)))
+                pygame.draw.line(image,(193,170,114),(204,107),(243,75),4)
+                pygame.draw.polygon(image,(88,127,77),
+                                    ((115,271),(141,254),(140,279),(123,285)))
+            self.images[judge]=image
 
     def font(self, size: int, bold: bool = False):
         """Use readable antialiased UI type, not tiny Consolas glyphs.
