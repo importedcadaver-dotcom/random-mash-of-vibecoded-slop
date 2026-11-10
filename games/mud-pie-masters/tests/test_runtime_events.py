@@ -104,3 +104,31 @@ def test_failed_first_contest_does_not_claim_chapter_complete(game):
     assert game.scene == "results"
     assert game.campaign["next_story"] == 0
     assert "Chapter complete" not in game.toast
+
+
+def test_all_goal_and_judge_text_is_accessible_by_real_mouse_click(game):
+    game.begin_round()
+    if game.overlay == "chapter":
+        game.choose_chapter(True)
+    game.start_crafting()
+    if game.overlay == "tutorial":
+        game.close_overlay()
+    game.draw()
+    click(game, (1135, 343))
+    assert game.overlay == "goals"
+    game.draw()
+    click(game, (644, 572))
+    assert game.overlay is None
+    game.pie.add_layer()
+    game.submit()
+    for _ in range(3):
+        post_and_frame(game, pygame.event.Event(
+            pygame.KEYDOWN, key=pygame.K_SPACE, mod=0, unicode=""
+        ))
+    assert game.scene == "results"
+    game.draw()
+    click(game, (1021, 647))
+    assert game.overlay == "judge_notes"
+    game.draw()
+    click(game, (644, 603))
+    assert game.overlay is None
