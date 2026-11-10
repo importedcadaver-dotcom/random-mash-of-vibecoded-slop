@@ -186,10 +186,10 @@ STORY_DATA = (
     (
         ("Lantern Petals", "Decoration", "Make a bright design to match the forest lanterns.", (g("colors_min", 4), g("kind_min", 8, "petals")), (), "night", 59, "Daisy proudly declares yours the prettiest lantern."),
         ("Moon Mirror", "Symmetry", "Build a mirror-image cake beneath the moon.", (g("pair_min", 4), g("feature_min", 75, "Symmetry")), (), "night", 60, "Fern admires the reflection in the pond."),
-        ("Stick Constellation", "Originality", "Stretch sticks into constellations among the berries.", (g("kind_min", 6, "sticks"), g("kind_min", 6, "berries"), g("shaped_decos_min", 3, "sticks")), ("mud", "sticks", "berries"), "night", 59, "Boulder sees a bear-shaped constellation."),
+        ("Stick Constellation", "Originality", "Rotate sticks into constellations among the berries.", (g("kind_min", 6, "sticks"), g("kind_min", 6, "berries")), ("mud", "sticks", "berries"), "night", 59, "Boulder sees a bear-shaped constellation."),
         ("The Little Giant", "Size", "Keep it small in width, enormous in ambition.", (g("tiers_min", 5), g("feature_min", 42, "Integrity")), (), "night", 61, "Bruno is both furious and deeply impressed."),
         ("Many-Colored Woods", "Decoration", "Every color and ingredient should tell a story.", (g("colors_min", 5), g("kinds_min", 5)), (), "night", 61, "Daisy says she could stare at it all night."),
-        ("The Forest Gala", "Originality", "The animals are here. Give them a show.", (g("shapes_min", 3), g("top_decos_min", 10)), (), "night", 63, "The entire woodland audience stamps their paws."),
+        ("The Forest Gala", "Originality", "The animals are here. Shape petals into something theatrical.", (g("shapes_min", 3), g("top_decos_min", 10), g("shaped_decos_min", 2, "petals")), (), "night", 63, "The entire woodland audience stamps their paws."),
     ),
     (
         ("Finalist's Breakfast", "Symmetry", "Begin the finals with neat and careful work.", (g("pair_min", 5), g("feature_min", 78, "Symmetry")), (), "clear", 63, "Fern announces you belong among the finalists."),
