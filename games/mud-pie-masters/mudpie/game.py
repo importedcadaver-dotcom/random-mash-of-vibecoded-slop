@@ -1351,6 +1351,9 @@ class Game:
                 return
             kind=d['kind']
             if kind=='mud':
+                if self.fall_animations:
+                    self.notify('Wait for the falling mud to land before adding another scoop.')
+                    return
                 if len(self.pie.layers)>=7:
                     self.notify('Seven tiers is the limit. A brave attempt!')
                     return
