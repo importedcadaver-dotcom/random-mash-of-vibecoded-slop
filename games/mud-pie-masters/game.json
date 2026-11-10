@@ -5,8 +5,8 @@
   "platform": [
     "Windows"
   ],
-  "version": "0.6.0-dev",
-  "status": "automated-runtime-tested",
+  "version": "0.6.1-qa",
+  "status": "full-campaign-automated-runtime-tested",
   "release_status": "pre-release-candidate",
   "offline": true,
   "paid_dependencies": false,
@@ -15,5 +15,7 @@
   "agent_contribution": "ChatGPT GPT-6 / mud-pie-masters / import-v0.5",
   "primary_entrypoint": "main.py",
   "test_command": "python -m pytest -q",
-  "automation_qa": "SDL event-driven Windows/Linux CI, 20 screenshot walkthrough frames per OS"
+  "automation_qa": "SDL event-driven Windows/Linux CI, 20 screenshot walkthrough frames per OS",
+  "windows_exe_qa": "PyInstaller onedir built on Windows Actions; headless executable smoke verified",
+  "full_campaign_qa": "48 Pygame scoring/presentation/save loops with oracle-built test pies; not human playtime"
 }
