@@ -40,7 +40,7 @@
 - Root instructions: `AGENTS.md`, `docs/MULTI_AGENT_WORKFLOW.md`, `docs/AGENT_REGISTRY.md`.
 - Project instructions: `games/mud-pie-masters/AGENTS.md`, `AGENT_IDENTITY.md`, this file.
 - Coordinate shared `mudpie/game.py` modifications and other overlapping work in issue/PR comments.
-- The GitHub integration **cannot currently edit repository rulesets or branch-protection settings**. Public-ruleset read reported none as of this record. See `docs/BRANCH_PROTECTION_SETUP.md` for the owner action still needed.
+- **Repository protection is now active.** On 2026-11-09, ruleset #26908579 was verified active for `main` with required PRs, `agent-governance`, non-fast-forward/deletion protection, and no bypass actors. Issue #5 is closed. The connected GitHub integration still cannot **edit** rulesets.
 - Do not store personal info or conversation transcripts here; this repository is **public**.
 
 ## Handoff checklist for each agent completing a task
@@ -52,3 +52,13 @@ Add a dated entry below with: task, author label, branch/PR, files changed, veri
 - Established stable public names, identity registry, project memory, and documented enforcement instructions.
 - Scope limited to documentation and collaboration mechanics; **no gameplay code or playtime claim changed**.
 - GitHub branch/ruleset actual enforcement must be verified independently; documentation alone is not protection.
+
+### 2026-11-09 — Mossbyte / v0.6 automated gameplay reliability
+
+- Workstream: `MPM-CHAT-20261109-A/v0.6-reliability`; PR [#6](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/pull/6), branch `agent/mud-pie-masters/mossbyte-v06-runtime-qa`.
+- **Implemented:** shared real-game SDL event dispatcher and frame step; automated mouse/keyboard/resize walkthrough with screenshot artifacts; additional Pygame event regression tests; legible full crafting-goal panel; full judge-comment panel; safer notification transitions; numeric star labels; fix for false chapter-completion message at progress zero.
+- **Evidence as of latest checked run:** [GitHub Actions #42740408609](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/actions/runs/42740408609), 137 tests passed on Windows and Linux, campaign simulation passed, 20 actual SDL/Pygame screenshots and a trace of 186 injected events from Windows. Test used SDL dummy video/audio; screenshots are actual game renderings but **not physical Windows screen captures**.
+- **Verified gameplay path:** title -> chapter -> clearing/siblings -> tutorial -> crafting with tools/decorations -> judging -> 3-star story advancement -> report -> map -> free-build save -> gallery -> resize and letterboxed click.
+- **Not verified:** two hours of enjoyable human play, physical Windows display/input/audio, exe packaging, performance. `gameplay_hours_verified` remains **false**. The project is **v0.6.0-dev**, not a player-ready release. Continue to use Issue #2.
+- **Documentation:** [`QA_RUNTIME_v0.6.md`](QA_RUNTIME_v0.6.md) includes reproducible commands, artifact links and findings.
+- **No new game canon or final art approval introduced.** Previous v0.4 cub artwork remains a possible placeholder. All user-approved prior constraints preserved.
