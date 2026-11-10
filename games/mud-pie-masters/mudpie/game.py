@@ -1244,6 +1244,11 @@ class Game:
                     return
         if self.overlay or self.scene!='craft':
             return
+        if self.fall_animations:
+            # Editing while an object is falling could reorder the layers and
+            # invalidate animation indices. Toolbar UNDO still works above.
+            self.notify('Let the falling mud land before sculpting again.')
+            return
         if button==3:
             d=self._deco_at(pos)
             if d is not None:
