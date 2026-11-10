@@ -85,3 +85,22 @@ def test_quit_event_stops_main_loop_flag_without_killing_test(game):
     assert game.running
     post_and_frame(game, pygame.event.Event(pygame.QUIT))
     assert not game.running
+
+
+def test_failed_first_contest_does_not_claim_chapter_complete(game):
+    game.begin_round()
+    if game.overlay == "chapter":
+        game.choose_chapter(True)
+    game.start_crafting()
+    if game.overlay == "tutorial":
+        game.close_overlay()
+    game.pie.add_layer()
+    game.submit()
+    assert game.scene == "presentation"
+    for _ in range(3):
+        post_and_frame(game, pygame.event.Event(
+            pygame.KEYDOWN, key=pygame.K_SPACE, mod=0, unicode=""
+        ))
+    assert game.scene == "results"
+    assert game.campaign["next_story"] == 0
+    assert "Chapter complete" not in game.toast
