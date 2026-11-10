@@ -145,7 +145,7 @@ def test_new_scoop_is_deferred_while_an_older_tier_is_falling(game):
     assert len(game.pie.layers)==2
     gesture(game,(65,405),(655,508))
     assert len(game.pie.layers)==2
-    assert "Wait" in game.toast
+    assert "falling mud land" in game.toast.lower()
     finish_fall(game)
     gesture(game,(65,405),(655,508))
     assert len(game.pie.layers)==3
