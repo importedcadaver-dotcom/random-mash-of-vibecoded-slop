@@ -54,8 +54,11 @@ function dismissWelcome(doc){click(doc,'[data-dismiss]','dismiss','')}
 {
   const game=newGame(),{document,store}=game;dismissWelcome(document);
   click(document,'[data-page]','page','build');
+  assert.match(document.nodes['#view'].innerHTML,/class="scene-overlay"/,'build tools open over the village');
+  assert.match(document.nodes['#view'].innerHTML,/class="cub-ambient"/,'home map includes animated cubs');
+  assert.equal((document.nodes['#view'].innerHTML.match(/type-wall/g)||[]).length,8,'starter den has a connected wall ring');
   click(document,'[data-select-build]','selectBuild','berry');
-  assert.match(document.nodes['#view'].innerHTML,/Tap an open meadow plot/);
+  assert.match(document.nodes['#view'].innerHTML,/Tap any glowing open clearing/);
   assert.match(document.nodes['#view'].innerHTML,/class="village-svg"/);
   assert.match(document.nodes['#view'].innerHTML,/ATTACK!/);
   click(document,'[data-cell]','cell','0,1');
@@ -71,7 +74,7 @@ function dismissWelcome(doc){click(doc,'[data-dismiss]','dismiss','')}
   assert.equal(data.collection.length,5,'training records each specialist in the Bear Book');
   assert.equal(Object.values(data.squad).reduce((a,b)=>a+b,0),5,'squad capacity accommodates five cub types');
   const reloaded=newGame(store);
-  assert.match(reloaded.document.nodes['#view'].innerHTML,/MOSSWOOD FAMILY DEN/,'saved game loads back into the den');
+  assert.match(reloaded.document.nodes['#view'].innerHTML,/Mosswood Family Den/,'saved game loads back into the den');
   assert.equal(saved(store).buildings.filter(b=>b.type==='berry').length,2,'placed building survives reload');
 }
 

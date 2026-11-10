@@ -7,9 +7,11 @@
 
 ## Visual direction
 
-The first pass looked like a management dashboard. This revision puts the den map first: an original, storybook isometric meadow with visible buildings, walls, trees, building levels, and resource yields. Resource counters stay at the top; Attack, End day, build shortcuts, squad status, and building upgrades sit around the map. The map is built from inline SVG and CSS, so it stays self-contained and uses no copied game art.
+The early pass looked like a management dashboard. This revision removes the sidebar from the den view, makes the village fill the screen, uses hand-drawn SVG buildings and cubs, closes the starter walls around the family core, and hides labels until a building is selected. Resource counts remain at the top; Attack, Build, Army, and End day controls sit along the bottom. Build and Army open as panels over the still-visible village. All art is original inline SVG and CSS.
 
-An original, offline, single-player den-building and raiding prototype set in Mosswood Valley. It runs in a modern desktop or mobile browser, uses original CSS and Unicode art, and saves progress in that browser.
+This direction uses the official [Clash of Clans interface rework](https://supercell.com/en/games/clashofclans/blog/news/weve-revamped-the-clash-of-clans-user-interface/) and [game overview](https://play.google.com/store/apps/details?id=com.supercell.clashofclans) as genre research: keep the village prominent, make Build and Battle easy to reach, and connect layouts, defenses, troop choices, and loot into the main loop. The screenshots are visual references only. Names, artwork, layout, and rules here are original.
+
+An original, offline, single-player den-building and raiding prototype set in Mosswood Valley. It runs in a modern desktop or mobile browser, uses hand-drawn vector art with small Unicode accents, and saves progress in that browser.
 
 ## Run it
 
