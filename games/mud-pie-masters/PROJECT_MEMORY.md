@@ -82,3 +82,13 @@ Add a dated entry below with: task, author label, branch/PR, files changed, veri
 - Previously passing v0.6.1 automated QA still does NOT certify human enjoyment; player found tutorial, control, visual and physical-system problems in first actual session.
 - Preserve praised parts: squish feedback, shape/flatten, cute Bruno/Daisy personalities, Daisy's decorations. Keep unfinished items in Issues #9 and #10; **do not mark the 2-hour goal complete**.
 - Tests and PR status: see PR #11 Actions for the actual most recent results; document future PR B/C/D/E evidence separately, not by assuming PR A covers them.
+
+### 2026-11-09 — Mossbyte / PR B: UI and controls (first-play recovery)
+
+- Branch `agent/mud-pie-masters/mossbyte-v07-ui-controls-20261109`, [PR #12](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/pull/12), following merged PR A #11.
+- Compact goal sidebar no longer renders clipped 10px full labels and overlapping values; it shows goal count/status while the full description remains in `VIEW GOALS`.
+- Replaced color cycling-only mouse UI with clickable swatch picker. Keyboard C still cycles. Added **visible undoable Rotate Last (R)**; Undo/Redo moved into editing cluster, destructive Start Over requires Pause/Settings confirmation, and Help stays visible.
+- Results medal badge moved into top-right header to avoid overlapping third competitor's score card.
+- Fixed CodeRabbit PR A guide navigation page-count clamp (uses actual `len(pages)`).
+- Verified first run: [CI #42752180885](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/actions/runs/42752180885): **149 pytest tests passed on Windows and Linux**, event walkthrough and full 48-round oracle-assisted runtime passed. [Windows EXE #42752180893](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/actions/runs/42752180893) smoke passed. Added new screenshot checkpoints for color swatches and Rotate; use latest PR head CI for final confirmation.
+- The full 2-hour enjoyable human release criterion is still **unverified**, falling mud, fonts, sprite clipping, judge art and petal/stick reshaping remain open. Do not close [Issue #9](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/issues/9) before real retest.

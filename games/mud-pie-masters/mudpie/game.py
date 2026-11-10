@@ -199,6 +199,26 @@ class Game:
     def allowed_ingredient(self, kind):
         return not self.mission or not self.mission.allowed or kind in self.mission.allowed
 
+    def choose_color(self, index: int):
+        """Select an explicit visible swatch; never make players guess a cycle."""
+        self.color_variant = max(0,min(unlocked_colors(self.campaign)-1,int(index)))
+        self.close_overlay()
+        self.notify(f'Color {self.color_variant+1} selected for future decorations.')
+
+    def open_colors(self):
+        if self.scene == 'craft':
+            self.show_overlay('colors')
+
+    def rotate_last_decoration(self):
+        """Both the visible ROTATE control and R use the same undoable action."""
+        if not self.pie.decorations:
+            self.notify('Decorate your pie first, then rotate your last decoration.')
+            return
+        self.snapshot()
+        self.pie.decorations[-1].angle = (self.pie.decorations[-1].angle + 30) % 360
+        self.sfx('pop')
+        self.notify('Last decoration rotated 30 degrees. UNDO reverses it.')
+
     def cycle_color(self):
         count = unlocked_colors(self.campaign)
         self.color_variant = (self.color_variant + 1) % count
@@ -673,33 +693,29 @@ class Game:
             self.paint.text(self.canvas,f'Weather: {self.mission.weather.upper()}',
                             (1055,313),12,(150,86,64),bold=True)
         if self.mission:
-            self.button((1054,329,190,27),'VIEW ALL GOALS',
+            checks=[goal_progress(self.pie,goal,self.mission.weather)[1] for goal in self.mission.goals]
+            completed=sum(checks)
+            self.button((1054,329,190,34),f'GOALS {completed}/{len(checks)} - VIEW',
                         lambda:self.show_overlay('goals'),small=True)
+            # Full labels and live numeric values are in VIEW. Never squeeze
+            # 200-pixel descriptions into 10px text beside a second counter.
+            for i,done in enumerate(checks[:3]):
+                self.paint.text(self.canvas,f'Goal {i+1}: '+('COMPLETE' if done else 'TO DO'),
+                                (1059,369+i*19),14,(43,113,75) if done else INK,bold=True)
         else:
             self.paint.text(self.canvas,'CREATIVE MEADOW',(1055,335),17,DARK,bold=True)
-        if self.mission:
-            for i,goal in enumerate(self.mission.goals[:3]):
-                value, ok = goal_progress(self.pie,goal, self.mission.weather)
-                # One complete objective per line with progress directly underneath.
-                # The old 133-pixel label was clipped to 'At least 1 mud t…'
-                # and concealed essential rules from new players.
-                y = 356 + i * 24
-                self.paint.text(self.canvas,('OK ' if ok else '- ')+goal.label,
-                                (1055,y),10,(54,130,72) if ok else INK,max_w=197)
-                self.paint.text(self.canvas,f'{value:g}/{goal.target:g}',
-                                (1197,y+12),10,(54,130,72) if ok else INK,max_w=50)
-        else:
-            self.paint.wrap(self.canvas,'Build anything! Nothing is graded.',1055,360,183,15)
+            self.paint.wrap(self.canvas,'Build anything! Nothing is graded.',1055,367,183,15)
         self.button((1054,431,190,34),
-                    f'COLOR {self.color_variant+1}/{unlocked_colors(self.campaign)} (C)',
-                    self.cycle_color,small=True)
+                    f'COLOR {self.color_variant+1}/{unlocked_colors(self.campaign)} - CHOOSE',
+                    self.open_colors,small=True)
         if self.campaign['next_story'] >= 6:
             self.paint.text(self.canvas,'M: Twin decor '+('ON' if self.mirror_mode else 'OFF'),
-                            (1055,462),12,DARK,bold=self.mirror_mode)
-        self.button((1054,465,91,40),'UNDO',self.undo,small=True)
-        self.button((1152,465,92,40),'REDO',self.redo,small=True)
-        self.button((1054,513,190,43),'START OVER',lambda:self.show_overlay('reset'),small=True)
-        self.button((1054,563,190,42),'HELP / ? ',lambda:self.show_overlay('tutorial'),small=True)
+                            (1055,468),11,DARK,bold=self.mirror_mode)
+        self.button((1054,488,91,34),'UNDO',self.undo,small=True)
+        self.button((1152,488,92,34),'REDO',self.redo,small=True)
+        self.button((1054,528,190,29),'ROTATE LAST (R)',self.rotate_last_decoration,
+                    small=True,disabled=not self.pie.decorations)
+        self.button((1054,563,190,42),'HELP / ?',lambda:self.show_overlay('tutorial'),small=True)
         self.button((1054,611,190,43),'PAUSE / ESC',lambda:self.show_overlay('settings'),small=True)
         # Ingredient target/workbench hints.
         self.paint.rect(self.canvas,(321,111,702,45),(228,213,173),15,(157,126,85),1,alpha=232)
@@ -823,8 +839,10 @@ class Game:
         self._heading(f'And the winner is… {winner.upper()}!',f'{self.theme[0]} · Round {self.round_no-1} results')
         if self.mission:
             medal_message=f'Challenge stars: {self.mission_medals} / 3'
-            self.paint.rect(self.canvas,(840,372,398,32),PAPER,11,(110,95,71),1)
-            self.paint.text(self.canvas,medal_message,(854,380),17,DARK,bold=True)
+            # The old badge at y=372 overlapped the third score card (ends y=387).
+            # Anchor it in the unused header region, clear of both score rows.
+            self.paint.rect(self.canvas,(906,17,327,61),PAPER,11,(110,95,71),1)
+            self.paint.text(self.canvas,medal_message,(924,36),18,DARK,bold=True)
         for i,name in enumerate(self.names):
             x=42+i*415
             iswinner=(name==winner)
@@ -952,7 +970,8 @@ class Game:
                 self.paint.text(self.canvas,f'{label}: {round(self.settings[key]*100)}%',(380,y+8),20,DARK,bold=True)
                 self._overlay_button((756,y,60,41),'-',lambda k=key:self.adjust_volume(k,-.1))
                 self._overlay_button((826,y,60,41),'+',lambda k=key:self.adjust_volume(k,+.1))
-            self._overlay_button((376,483,532,48),'FULLSCREEN / WINDOWED (F11)',self.toggle_fullscreen)
+            self._overlay_button((376,483,262,48),'FULLSCREEN (F11)',self.toggle_fullscreen)
+            self._overlay_button((649,483,259,48),'START OVER...',lambda:self.show_overlay('reset'))
             self._overlay_button((376,556,532,58),'RETURN TO THE GAME',self.close_overlay,True)
         elif self.overlay=='tutorial':
             # A small page at a time; a first-time player is never hit with
@@ -995,11 +1014,28 @@ class Game:
                 self.paint.wrap(self.canvas,line,283,259+i*50,720,18)
             if page>0:
                 self._overlay_button((270,541,150,56),'BACK',
-                                     lambda:setattr(self,'guide_page',max(0,self.guide_page-1)))
+                                     lambda p=page:setattr(self,'guide_page',max(0,p-1)))
             self._overlay_button((438,541,401,56),'LET ME TRY IT',self.close_overlay,True)
             if page<len(pages)-1:
                 self._overlay_button((854,541,153,56),'NEXT',
-                                     lambda:setattr(self,'guide_page',min(4,self.guide_page+1)))
+                                     lambda p=page,n=len(pages):setattr(self,'guide_page',min(n-1,p+1)))
+        elif self.overlay=='colors':
+            self.paint.rect(self.canvas,(225,165,834,375),CREAM,24,(88,77,51),4)
+            self.paint.text(self.canvas,'CHOOSE YOUR NEXT DECORATION COLOR',(261,194),29,DARK,bold=True)
+            self.paint.text(self.canvas,'Pick a swatch. The choice applies to future decorations.',
+                            (265,245),18,INK)
+            count = unlocked_colors(self.campaign)
+            preview_kind = self.selected if self.selected in DECORATIONS else 'petals'
+            for i in range(count):
+                rect=pygame.Rect(268+i*127,290,115,115)
+                self.paint.rect(self.canvas,rect,(205,226,191) if i==self.color_variant else PAPER,
+                                8,(57,106,77) if i==self.color_variant else (113,91,69),3)
+                draw_ingredient(self.canvas,preview_kind,rect.centerx,rect.top+47,1.45,
+                                color_variant=i)
+                self.paint.text(self.canvas,f'COLOR {i+1}',(rect.centerx,rect.top+83),15,DARK,
+                                bold=True,center=True)
+                self.buttons.append((rect,lambda n=i:self.choose_color(n)))
+            self._overlay_button((453,459,377,55),'BACK TO WORKBENCH',self.close_overlay,True)
         elif self.overlay=='report':
             self.paint.rect(self.canvas,(216,88,848,544),CREAM,26,(96,80,57),4)
             self.paint.text(self.canvas,'CONTEST REPORT', (260,117),34,DARK,bold=True)
@@ -1347,10 +1383,8 @@ class Game:
                 self.undo()
             elif event.key==pygame.K_y and event.mod&pygame.KMOD_CTRL:
                 self.redo()
-            elif event.key==pygame.K_r and self.pie.decorations:
-                self.snapshot()
-                self.pie.decorations[-1].angle+=30
-                self.sfx('pop')
+            elif event.key==pygame.K_r:
+                self.rotate_last_decoration()
             elif event.key==pygame.K_h or event.key==pygame.K_F1:
                 self.show_overlay('tutorial')
             elif event.key==pygame.K_c:
