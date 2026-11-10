@@ -101,9 +101,34 @@ class Pie:
         if len(self.layers) >= 7:
             raise ValueError("Maximum seven tiers. The forest has limits!")
         layer = MudLayer(x=x, width=width, height=height, wetness=wetness, shape=shape)
-        self.layers.append(layer)
+        # Fallen clumps live at the end of the array as table debris. Insert
+        # new scoops BEFORE debris so a player can rebuild on a standing base.
+        first_debris = next((i for i,l in enumerate(self.layers) if l.fallen),len(self.layers))
+        self.layers.insert(first_debris,layer)
+        for deco in self.decorations:
+            if deco.layer >= first_debris:
+                deco.layer += 1
         self.moves += 1
         return layer
+
+    def settle_unsupported(self) -> list[int]:
+        """Drop upper tiers with no physical center-of-mass support.
+
+        A tier is not supported merely because two edges happen to overlap:
+        its center must project over the supporting layer. Cascades are
+        deterministic, persistent and reversible through normal Pie snapshots.
+        This checks placement, not the separate weather/judging collapse score.
+        """
+        dropped = []
+        for i,layer in enumerate(self.layers):
+            if layer.fallen or i == 0:
+                continue
+            below = self.layers[i-1]
+            if below.fallen or abs(layer.x-below.x) > below.width / 2:
+                layer.fallen = True
+                layer.damage = max(layer.damage,.68)
+                dropped.append(i)
+        return dropped
 
     def add_deco(self, kind: str, layer: int, x: float, y: float,
                  angle: float = 0, color: int = 0) -> Decoration:

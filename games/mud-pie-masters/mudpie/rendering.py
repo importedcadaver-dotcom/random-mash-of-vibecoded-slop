@@ -176,7 +176,9 @@ def _rough_outline(w, h, phase):
 
 
 def draw_pie(surf, pie: Pie, base_x: float, base_y: float, scale: float = 1.0,
-             wobble: float = 0.0, show_structure: bool = False):
+             wobble: float = 0.0, show_structure: bool = False,
+             hidden_fallen: set[int] | None = None,
+             draw_shadow: bool = True):
     """Irregular earth-sculpted tiers with stratified texture; no cake cylinders.
 
     Geometry, centering and tier order are unchanged from the simulation so
@@ -185,11 +187,16 @@ def draw_pie(surf, pie: Pie, base_x: float, base_y: float, scale: float = 1.0,
     if not pie.layers:
         return
     base_x,base_y=int(base_x),int(base_y)
-    _ellipse(surf,(61,49,42),(base_x-140*scale,base_y-14*scale,280*scale,29*scale))
-    _ellipse(surf,(157,121,81),(base_x-131*scale,base_y-12*scale,262*scale,19*scale))
+    if draw_shadow:
+        _ellipse(surf,(61,49,42),(base_x-140*scale,base_y-14*scale,280*scale,29*scale))
+        _ellipse(surf,(157,121,81),(base_x-131*scale,base_y-12*scale,262*scale,19*scale))
     upward=0
     for i,layer in enumerate(pie.layers):
         if layer.fallen:
+            if hidden_fallen and i in hidden_fallen:
+                # A real falling animation is passing through the air.
+                # Do not also draw its landed debris before contact.
+                continue
             fx=base_x+layer.x*scale+((i%2)*70-35)*scale
             fy=base_y+(i%3*7)*scale
             pts=[(fx-51*scale,fy),(fx-38*scale,fy-16*scale),
@@ -248,8 +255,16 @@ def draw_pie(surf, pie: Pie, base_x: float, base_y: float, scale: float = 1.0,
         if show_structure:
             pygame.draw.rect(surf,(222,193,121),(int(x),int(top),int(w),int(h)),1)
     for d in pie.decorations:
-        if pie.layers[d.layer].fallen:continue
-        px,py=decoration_anchor(pie,d,base_x,base_y,scale)
+        if pie.layers[d.layer].fallen:
+            if hidden_fallen and d.layer in hidden_fallen:
+                continue
+            # Fallen decorations remain visible as scattered keepsakes on the
+            # tabletop instead of silently vanishing with the collapsed tier.
+            layer=pie.layers[d.layer]
+            px=base_x+(layer.x+d.x*layer.width*.34)*scale
+            py=base_y-(9+d.y*12)*scale
+        else:
+            px,py=decoration_anchor(pie,d,base_x,base_y,scale)
         draw_ingredient(surf,d.kind,px,py,scale*min(1.15,max(.6,scale**-.15)),d.angle,d.color)
     for i,layer in enumerate(pie.layers):
         if not layer.fallen and layer.damage>.3:

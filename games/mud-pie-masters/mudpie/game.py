@@ -1,6 +1,7 @@
 """Mud Pie Masters -- complete single-player Pygame competition loop."""
 from __future__ import annotations
 import math
+from dataclasses import replace
 from typing import Callable
 
 import pygame
@@ -66,6 +67,7 @@ class Game:
         self.rival_pies = []
         self.sibling_actions = set()
         self.mud_flecks = []
+        self.fall_animations = []  # Visual gravity; settled layers persist in the Pie model.
         self.last_fleck_time = -1.0
         self.sound = {}
         self.sound_enabled = False
@@ -154,6 +156,7 @@ class Game:
         self.presentation_step = 0
         self.inspected = 0
         self.sibling_actions = set()
+        self.fall_animations.clear()
 
     def interact_sibling(self, name: str, action: str) -> None:
         if name in self.sibling_actions:
@@ -178,6 +181,7 @@ class Game:
     def start_free_build(self):
         """A genuinely judgment-free construction session that can be saved."""
         self.mode = 'free'
+        self.fall_animations.clear()
         self.mission = None
         self.theme = ('Creative Meadow', 'No goals, no points, just glorious mud.', 'Originality')
         self.pie = Pie(title='My free-build mud creation')
@@ -283,6 +287,38 @@ class Game:
             self.save()
             self.show_overlay('tutorial')
 
+    def settle_pie_support(self) -> list[int]:
+        """Animate a real gravity drop when an upper tier loses its support.
+
+        The model marks the pieces fallen immediately (no static hovering),
+        while the renderer temporarily hides the landed debris until a
+        falling mud tier has actually reached the tabletop.
+        """
+        if self.fall_animations:
+            return []
+        scale = self._work_scale()
+        bottom_y = {}
+        total = 0.
+        for i,layer in enumerate(self.pie.layers):
+            if layer.fallen:
+                continue
+            total += layer.height
+            bottom_y[i] = TABLE_Y - (total-layer.height)*scale
+        dropped = self.pie.settle_unsupported()
+        for i in dropped:
+            layer=self.pie.layers[i]
+            alone = replace(layer, x=0., fallen=False)
+            origin=bottom_y[i]
+            duration=max(.25,min(.75,(TABLE_Y-origin)/360.))
+            self.fall_animations.append({
+                'idx':i,'pie':Pie(layers=[alone]),'x':layer.x,'scale':scale,
+                'origin':origin,'elapsed':0.,'duration':duration,
+            })
+        if dropped:
+            self.notify(f'{len(dropped)} unsupported mud tier(s) fell! They landed on the table.')
+            self.sfx('splat')
+        return dropped
+
     def snapshot(self):
         self.undos.append(self.pie.to_dict())
         self.undos = self.undos[-60:]
@@ -293,6 +329,7 @@ class Game:
             self.notify('Nothing left to undo.')
             return
         self.redos.append(self.pie.to_dict())
+        self.fall_animations.clear()
         self.pie = Pie.from_dict(self.undos.pop())
         self.sfx('pop')
 
@@ -301,10 +338,14 @@ class Game:
             self.notify('Nothing left to redo.')
             return
         self.undos.append(self.pie.to_dict())
+        self.fall_animations.clear()
         self.pie = Pie.from_dict(self.redos.pop())
         self.sfx('pop')
 
     def submit(self):
+        if self.fall_animations:
+            self.notify('Let the falling mud land before saving your pie!')
+            return
         if self.mode == 'free':
             if not self.pie.layers:
                 self.notify('Make at least one mud tier before saving!')
@@ -605,6 +646,9 @@ class Game:
         total=0.0
         bounds=[]
         for layer in self.pie.layers:
+            if layer.fallen:
+                bounds.append((0,0,0,0))  # Debris on the table isn't a floating tier.
+                continue
             total+=layer.height
             bounds.append((TABLE_X+(layer.x-layer.width/2)*scale,
                            TABLE_Y-total*scale,layer.width*scale,layer.height*scale))
@@ -739,7 +783,16 @@ class Game:
         self.paint.text(self.canvas,instr,(339,122),16,INK,max_w=670)
         if self.pie.layers:
             wobble=math.sin(self.timer*8)*3 if stab.risk!='stable' and not self.settings['reduced_motion'] else 0
-            draw_pie(self.canvas,self.pie,TABLE_X,TABLE_Y,self._work_scale(),wobble)
+            draw_pie(self.canvas,self.pie,TABLE_X,TABLE_Y,self._work_scale(),wobble,
+                     hidden_fallen={a['idx'] for a in self.fall_animations})
+            # Falling tiers move downward with acceleration, then become a
+            # real fallen pile rendered by draw_pie after ground contact.
+            for anim in self.fall_animations:
+                t=min(1.,anim['elapsed']/anim['duration'])
+                fall_distance=(TABLE_Y-anim['origin'])*t*t
+                draw_pie(self.canvas,anim['pie'],
+                         TABLE_X+anim['x']*anim['scale'],
+                         anim['origin']+fall_distance,anim['scale'],draw_shadow=False)
         else:
             self.paint.rect(self.canvas,(461,349,401,133),(226,208,166),23,(137,107,73),2,alpha=214)
             self.paint.text(self.canvas,'A blank canvas of glorious dirt!',(661,384),23,DARK,bold=True,center=True)
@@ -1112,6 +1165,7 @@ class Game:
     def reset_pie(self):
         self.snapshot()
         self.pie=Pie(title=f'My masterpiece #{self.round_no}')
+        self.fall_animations.clear()
         self.close_overlay()
         self.sfx('splat')
 
@@ -1189,6 +1243,11 @@ class Game:
                     self.sfx('pop')
                     return
         if self.overlay or self.scene!='craft':
+            return
+        if self.fall_animations:
+            # Editing while an object is falling could reorder the layers and
+            # invalidate animation indices. Toolbar UNDO still works above.
+            self.notify('Let the falling mud land before sculpting again.')
             return
         if button==3:
             d=self._deco_at(pos)
@@ -1297,6 +1356,9 @@ class Game:
                 return
             kind=d['kind']
             if kind=='mud':
+                if self.fall_animations:
+                    self.notify('Wait for the falling mud to land before adding another scoop.')
+                    return
                 if len(self.pie.layers)>=7:
                     self.notify('Seven tiers is the limit. A brave attempt!')
                     return
@@ -1307,8 +1369,9 @@ class Game:
                     x=clamp(x,-65,65)
                 # A scoop is always the same finite quantity of mud.
                 wet=.42+(.13 if self.mission and self.mission.weather=='rain' else 0)
-                self.pie.add_layer(x,190,46,wet)
-                self.focus_layer_index = len(self.pie.layers)-1
+                new_layer=self.pie.add_layer(x,190,46,wet)
+                self.focus_layer_index = next(i for i,l in enumerate(self.pie.layers) if l is new_layer)
+                self.settle_pie_support()
                 self.add_mud_flecks(pos, 12)
                 self.tool=2 if len(self.pie.layers)>1 else 0
                 self.sfx('splat')
@@ -1324,15 +1387,17 @@ class Game:
                 self.sfx('pop')
         elif d['type']=='stackmove':
             if d['start'][1]-pos[1]>70 and len(self.pie.layers)>1:
-                idx=d['idx']
-                layer=self.pie.layers.pop(idx)
-                self.pie.layers.append(layer)
+                # Keep settled debris at the end, reordering only standing mud.
+                before=list(enumerate(self.pie.layers))
+                moved=before.pop(d['idx'])
+                insert_at=next((i for i,(_,l) in enumerate(before) if l.fallen),len(before))
+                before.insert(insert_at,moved)
+                index_map={old:new for new,(old,_) in enumerate(before)}
+                self.pie.layers=[layer for _,layer in before]
                 for deco in self.pie.decorations:
-                    if deco.layer==idx:
-                        deco.layer=len(self.pie.layers)-1
-                    elif deco.layer>idx:
-                        deco.layer-=1
-                self.notify('Tier moved to the very top!')
+                    deco.layer=index_map[deco.layer]
+                self.notify('Tier moved to the top of the standing pile!')
+            self.settle_pie_support()
             self.sfx('squish')
         elif d['type']=='shape':
             self.add_mud_flecks(pos, 7)
@@ -1342,6 +1407,7 @@ class Game:
                 layer.damage=clamp(layer.damage + (deformation-.22)*(.19 if layer.workable else .55),0,1)
             self.notify('The scoop stays the same size: spreading mud makes it thinner.'
                         if layer.width>d['width'] else 'Thicker mud makes a narrower tier.')
+            self.settle_pie_support()
             self.sfx('squish')
         elif d['type']=='mix':
             self.add_mud_flecks(pos, 7)
@@ -1399,6 +1465,18 @@ class Game:
             self.advance_presentation()
 
     def update(self, dt):
+        """Advance transient mud falls and settle any edits made during a fall."""
+        landed = False
+        for anim in list(self.fall_animations):
+            anim['elapsed'] += dt
+            if anim['elapsed'] >= anim['duration']:
+                self.fall_animations.remove(anim)
+                self.sfx('splat')
+                landed = True
+        if landed and not self.fall_animations and self.scene == 'craft':
+            # A second drag/reshape may have removed support mid-animation.
+            # Defer evaluation until the final falling object's index is free.
+            self.settle_pie_support()
         self.timer+=dt
         self.toast_time=max(0,self.toast_time-dt)
         if self.mud_flecks:
