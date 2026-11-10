@@ -1253,26 +1253,37 @@ class Game:
                 self.collapse_sound_played=True
                 self.sfx('splat')
 
+    def handle_event(self, event):
+        """Handle one SDL event for both the live loop and automated input tests.
+
+        Bots must send pygame events through this dispatcher rather than calling
+        on_down/on_key directly. This keeps resize and letterbox conversion tested.
+        """
+        if event.type == pygame.QUIT:
+            self.running = False
+        elif event.type == pygame.MOUSEMOTION:
+            self.on_motion(self.to_logical(event.pos))
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            self.on_down(self.to_logical(event.pos), event.button)
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self.on_up(self.to_logical(event.pos), event.button)
+        elif event.type == pygame.KEYDOWN:
+            self.on_key(event)
+        elif event.type == pygame.VIDEORESIZE and not self.fullscreen:
+            if event.w >= 600 and event.h >= 380:
+                self.display = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+
+    def step_frame(self, dt: float):
+        """Advance a single real game-loop frame, processing queued SDL events."""
+        self.update(max(0, min(float(dt), .05)))
+        for event in pygame.event.get():
+            self.handle_event(event)
+        self.draw()
+
     def run(self):
-        clock=pygame.time.Clock()
+        clock = pygame.time.Clock()
         self.draw()  # Prime button hit-targets before the first event.
         while self.running:
-            dt=min(clock.tick(60)/1000, .05)
-            self.update(dt)
-            for event in pygame.event.get():
-                if event.type==pygame.QUIT:
-                    self.running=False
-                elif event.type==pygame.MOUSEMOTION:
-                    self.on_motion(self.to_logical(event.pos))
-                elif event.type==pygame.MOUSEBUTTONDOWN:
-                    self.on_down(self.to_logical(event.pos),event.button)
-                elif event.type==pygame.MOUSEBUTTONUP:
-                    self.on_up(self.to_logical(event.pos),event.button)
-                elif event.type==pygame.KEYDOWN:
-                    self.on_key(event)
-                elif event.type==pygame.VIDEORESIZE and not self.fullscreen:
-                    if event.w>=600 and event.h>=380:
-                        self.display=pygame.display.set_mode((event.w,event.h),pygame.RESIZABLE)
-            self.draw()
+            self.step_frame(clock.tick(60) / 1000)
         self.save()
         pygame.quit()
