@@ -78,6 +78,10 @@ class Decoration:
     y: float
     angle: float = 0.0
     color: int = 0
+    # Shape/flatten gestures on petals and sticks are persistent and reversible.
+    # Defaults preserve appearance of existing saves without these fields.
+    stretch_x: float = 1.0
+    stretch_y: float = 1.0
 
     def __post_init__(self) -> None:
         if self.kind not in DECORATIONS:
@@ -86,6 +90,8 @@ class Decoration:
         self.y = clamp(float(self.y), 0.0, 1.0)
         self.angle = float(self.angle) % 360
         self.color = int(self.color) % 6
+        self.stretch_x = clamp(float(self.stretch_x), .5, 2.3)
+        self.stretch_y = clamp(float(self.stretch_y), .5, 2.3)
 
 
 @dataclass
