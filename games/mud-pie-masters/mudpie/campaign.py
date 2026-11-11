@@ -42,6 +42,7 @@ class Goal:
             "angle_variants_min": f"Use {int(self.target)} decoration angles (R key)",
             "compact_max": f"Keep the pie at most {int(self.target)}px wide",
             "layer_pattern_min": f"Decorate {int(self.target)} separate mud tiers",
+            "shaped_decos_min": f"Shape or flatten {int(self.target)} placed {self.kind}",
         }
         return name[self.rule]
 
@@ -89,6 +90,11 @@ def goal_progress(pie: Pie, goal: Goal, weather: str = "clear") -> tuple[float, 
         "angle_variants_min": len({int(d.angle // 45) for d in pie.decorations}),
         "compact_max": pie.footprint,
         "layer_pattern_min": len({d.layer for d in pie.decorations}),
+        "shaped_decos_min": sum(
+            d.kind == goal.kind and
+            (abs(d.stretch_x-1.0) >= .22 or abs(d.stretch_y-1.0) >= .22)
+            for d in pie.decorations
+        ),
     }
     if goal.rule == "feature_min":
         value = feature_scores(pie, weather=weather)[goal.kind]
@@ -154,7 +160,7 @@ STORY_DATA = (
         ("Puddle Parade", "Originality", "The first parade is underway. Make something nobody expected.", (g("kinds_min", 4), g("shapes_min", 2)), (), "clear", 55, "The forest votes to make the contest a tradition."),
     ),
     (
-        ("Petal Collector", "Decoration", "Give the judges a crown of petals.", (g("kind_min", 9, "petals"), g("top_decos_min", 5)), (), "clear", 55, "Petal admits she has never seen so many flowers in one place."),
+        ("Petal Collector", "Decoration", "Give the judges a crown of petals you have shaped yourself.", (g("kind_min", 9, "petals"), g("top_decos_min", 5), g("shaped_decos_min", 2, "petals")), (), "clear", 55, "Petal admits she has never seen so many flowers in one place."),
         ("Berry Confetti", "Decoration", "The decorations must be delicious-looking. Don't eat them!", (g("kind_min", 5, "berries"), g("colors_min", 2)), (), "clear", 55, "A hungry squirrel is politely turned away."),
         ("Only Leaves", "Symmetry", "The picnic ran out of petals. Get creative with leaves.", (g("kind_min", 8, "leaves"), g("pair_min", 2)), ("mud", "leaves"), "clear", 53, "Daisy calls the matching leaves little green wings."),
         ("Twin Towers", "Size", "Build two beautiful-looking stories with different heights.", (g("tiers_min", 3), g("feature_min", 58, "Integrity")), (), "clear", 57, "Bruno announces he is taking your structural notes."),
@@ -163,7 +169,7 @@ STORY_DATA = (
     ),
     (
         ("Ridge Monument", "Size", "A tall stack to mark the way up the ridge.", (g("tiers_min", 3), g("height_min", 155)), (), "wind", 58, "Bruno appoints himself the official hill architect."),
-        ("The No-Flower Rule", "Originality", "The flowers were blown away. Pebbles and sticks remain.", (g("kind_min", 5, "sticks"), g("kinds_min", 2)), ("mud", "pebbles", "sticks"), "wind", 57, "Daisy discovers sticks can look just as fancy."),
+        ("The No-Flower Rule", "Originality", "The flowers blew away. Flatten some sticks into a bold pattern.", (g("kind_min", 5, "sticks"), g("kinds_min", 2), g("shaped_decos_min", 2, "sticks")), ("mud", "pebbles", "sticks"), "wind", 57, "Daisy discovers sticks can look just as fancy."),
         ("Stone Spiral", "Symmetry", "Balance stones so the tower doesn't lean.", (g("kind_min", 10, "pebbles"), g("feature_min", 63, "Integrity")), (), "wind", 58, "Boulder tries to carry the sculpture home."),
         ("Wide as a Log", "Size", "Height isn't everything. Build a glorious wide base.", (g("width_min", 245), g("feature_min", 68, "Integrity")), (), "clear", 58, "Even Bruno admits your foundation is impressive."),
         ("The Crooked Crown", "Originality", "Lean on purpose, but keep it standing.", (g("offset_min", 30), g("feature_min", 48, "Integrity")), (), "wind", 59, "Daisy declares it a very fashionable bend."),
@@ -180,10 +186,10 @@ STORY_DATA = (
     (
         ("Lantern Petals", "Decoration", "Make a bright design to match the forest lanterns.", (g("colors_min", 4), g("kind_min", 8, "petals")), (), "night", 59, "Daisy proudly declares yours the prettiest lantern."),
         ("Moon Mirror", "Symmetry", "Build a mirror-image cake beneath the moon.", (g("pair_min", 4), g("feature_min", 75, "Symmetry")), (), "night", 60, "Fern admires the reflection in the pond."),
-        ("Stick Constellation", "Originality", "Sticks and berries make starry patterns.", (g("kind_min", 6, "sticks"), g("kind_min", 6, "berries")), ("mud", "sticks", "berries"), "night", 59, "Boulder sees a bear-shaped constellation."),
+        ("Stick Constellation", "Originality", "Rotate sticks into constellations among the berries.", (g("kind_min", 6, "sticks"), g("kind_min", 6, "berries")), ("mud", "sticks", "berries"), "night", 59, "Boulder sees a bear-shaped constellation."),
         ("The Little Giant", "Size", "Keep it small in width, enormous in ambition.", (g("tiers_min", 5), g("feature_min", 42, "Integrity")), (), "night", 61, "Bruno is both furious and deeply impressed."),
         ("Many-Colored Woods", "Decoration", "Every color and ingredient should tell a story.", (g("colors_min", 5), g("kinds_min", 5)), (), "night", 61, "Daisy says she could stare at it all night."),
-        ("The Forest Gala", "Originality", "The animals are here. Give them a show.", (g("shapes_min", 3), g("top_decos_min", 10)), (), "night", 63, "The entire woodland audience stamps their paws."),
+        ("The Forest Gala", "Originality", "The animals are here. Shape petals into something theatrical.", (g("shapes_min", 3), g("top_decos_min", 10), g("shaped_decos_min", 2, "petals")), (), "night", 63, "The entire woodland audience stamps their paws."),
     ),
     (
         ("Finalist's Breakfast", "Symmetry", "Begin the finals with neat and careful work.", (g("pair_min", 5), g("feature_min", 78, "Symmetry")), (), "clear", 63, "Fern announces you belong among the finalists."),
@@ -200,7 +206,7 @@ SIDE_DATA = (
      ("Mama's Leaf Basket", "Decoration", "A little gift made with leaves and berries.", (g("kind_min", 6, "leaves"), g("kind_min", 4, "berries")), (), "clear", 54)),
     (("Rabbit's Flower Stand", "Decoration", "Make an attractive display for a rabbit friend.", (g("kind_min", 11, "petals"), g("colors_min", 3)), (), "clear", 56),
      ("Picnic Table Parade", "Size", "Create the best centerpiece without going tall.", (g("tiers_max", 2), g("width_min", 250)), (), "clear", 56)),
-    (("Mossy Miniature", "Originality", "A tiny ridge village. Only sticks and leaves.", (g("kind_min", 5, "sticks"), g("kind_min", 6, "leaves")), ("mud", "sticks", "leaves"), "wind", 57),
+    (("Mossy Miniature", "Originality", "A tiny ridge village. Shape its stick beams; only sticks and leaves.", (g("kind_min", 5, "sticks"), g("kind_min", 6, "leaves"), g("shaped_decos_min", 2, "sticks")), ("mud", "sticks", "leaves"), "wind", 57),
      ("Badger's Bridge", "Integrity", "A stacked, off-center bridge for a badger.", (g("tiers_min", 3), g("offset_min", 25)), (), "wind", 58)),
     (("Duckling's Umbrella", "Integrity", "A sturdy rain-day sculpture.", (g("tiers_min", 3), g("feature_min", 72, "Integrity")), (), "rain", 58),
      ("Stormy Color Test", "Decoration", "Only leaves and pebbles in wild weather.", (g("kind_min", 6, "pebbles"), g("colors_min", 3)), ("mud", "leaves", "pebbles"), "rain", 58)),

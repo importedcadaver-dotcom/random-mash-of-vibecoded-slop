@@ -41,10 +41,13 @@ class Game:
         self.mission_checks = []
         self.gallery_page = 0
         self.last_play_seconds = 0.0
+        self.craft_started_at = None
+        self.last_craft_seconds = 0.0
         self.fullscreen = False
         self.scene = 'title'
         self.overlay = None
         self.timer = 0.0
+        self.play_elapsed = 0.0  # Uncapped elapsed time; animation still uses self.timer.
         self.toast = ''
         self.toast_time = 0.0
         self.buttons: list[tuple[pygame.Rect, Callable]] = []
@@ -96,6 +99,51 @@ class Game:
             self.sound[name].set_volume(self.settings['sound_volume'])
             self.sound[name].play()
 
+    def export_playtest_report(self):
+        """Write local, opt-in session timing for independent human QA review.
+
+        Includes timings and outcomes only, never personal identifiers, emails
+        or network upload. Time includes idle/menus; cannot certify enjoyment.
+        """
+        import json
+        records = []
+        for entry in self.history if isinstance(self.history, list) else []:
+            if not isinstance(entry, dict):
+                continue  # Older or damaged saves may contain malformed history.
+            scores = entry.get('scores')
+            craft_seconds = entry.get('craft_seconds')
+            if not isinstance(craft_seconds, (int, float)) or not math.isfinite(craft_seconds):
+                craft_seconds = None
+            records.append({
+                'round': entry.get('round'),
+                'mission': entry.get('mission'),
+                'winner': entry.get('winner'),
+                'medals': entry.get('medals'),
+                'craft_seconds': craft_seconds,
+                'round_seconds': entry.get('round_seconds'),
+                'player_score': scores.get('You') if isinstance(scores, dict) else None,
+            })
+        report={
+            'game':'Mud Pie Masters',
+            'source':'local opt-in player report',
+            'observed_human_enjoyment_certified':False,
+            'total_foreground_elapsed_seconds':round(self.campaign['seconds'],2),
+            'recorded_contests':len(records),
+            'recorded_craft_seconds':round(sum(
+                float(x.get('craft_seconds') or 0) for x in records),2),
+            'rounds':records,
+            'caveat':'Timers include idle periods and menus; no human enjoyment or two-hour release gate is certified.'
+        }
+        try:
+            path=default_path().parent/'playtest_report.json'
+            path.parent.mkdir(parents=True,exist_ok=True)
+            path.write_text(json.dumps(report,indent=2),encoding='utf-8')
+        except (OSError,TypeError,ValueError) as exc:
+            self.notify(f'Could not write playtest report: {exc}')
+            return None
+        self.notify(f'Playtest report saved locally: {path.name}')
+        return path
+
     def save(self):
         try:
             save_game(self.round_no, self.rivals, self.gallery, self.history, self.settings, campaign=self.campaign)
@@ -144,7 +192,9 @@ class Game:
             self.theme = (m.title, m.description, m.focus)
         else:
             self.theme = THEMES[(self.round_no - 1) % len(THEMES)]
-        self.round_started_at = self.timer
+        self.round_started_at = self.play_elapsed
+        self.craft_started_at = None
+        self.last_craft_seconds = 0.0
         try:
             previous = Pie.from_dict(self.gallery[-1]['pie']) if self.gallery else None
         except (ValueError, TypeError, KeyError):
@@ -180,6 +230,7 @@ class Game:
 
     def start_free_build(self):
         """A genuinely judgment-free construction session that can be saved."""
+        self.craft_started_at = self.play_elapsed
         self.mode = 'free'
         self.fall_animations.clear()
         self.mission = None
@@ -280,6 +331,7 @@ class Game:
         self.close_overlay()
 
     def start_crafting(self):
+        self.craft_started_at = self.play_elapsed
         self.scene = 'craft'
         self.guide_page = 0
         if not self.settings.get('tutorial_seen',False):
@@ -351,9 +403,11 @@ class Game:
                 self.notify('Make at least one mud tier before saving!')
                 return
             self.gallery_page = 0
+            craft_elapsed=max(0.,self.play_elapsed-(self.craft_started_at if self.craft_started_at is not None else self.play_elapsed))
             self.gallery.append({'round': self.round_no, 'theme': 'Creative Meadow · Free Build',
                                  'pie': self.pie.to_dict(), 'signature': fingerprint(self.pie),
-                                 'score': 0, 'free': True})
+                                 'score': 0, 'free': True,
+                                 'craft_seconds': round(craft_elapsed,2)})
             self.gallery = self.gallery[-60:]
             self.save()
             self.scene = 'gallery'
@@ -363,6 +417,8 @@ class Game:
         if not self.pie.layers:
             self.notify('Scoop at least one muddy layer first!')
             return
+        self.last_craft_seconds=max(
+            0.,self.play_elapsed-(self.craft_started_at if self.craft_started_at is not None else self.play_elapsed))
         self.entries = [self.pie.copy(), *[pie.copy() for pie in self.rival_pies]]
         self.names = ['You', 'Bruno', 'Daisy']
         self.display_entries = []
@@ -421,6 +477,8 @@ class Game:
         self.gallery = self.gallery[-60:]
         self.history.append({'round': self.round_no, 'theme': self.theme[0],
                              'scores': scores, 'winner': winner, 'events': events,
+                             'craft_seconds': round(self.last_craft_seconds,2),
+                             'round_seconds': round(max(0.,self.play_elapsed-self.round_started_at),2),
                              'mission': self.mission.id if self.mission else None,
                              'medals': self.mission_medals,
                              'signatures': {name: fingerprint(pie)
@@ -538,6 +596,7 @@ class Game:
         self.button((443,521,284,54),'MY SCRAPBOOK',lambda:setattr(self,'scene','gallery'))
         self.button((96,593,235,42),'SETTINGS',lambda:self.show_overlay('settings'),small=True)
         self.paint.text(self.canvas,f"Round {self.round_no} · {int(self.campaign['seconds']//60)} min in game",(348,605),16,INK)
+        self.paint.text(self.canvas,'F10: Export local playtest report (timing only)',(96,628),14,INK)
         self._sprite('player',(956,400),(330,396))
         self._sprite('daisy',(1127,517),(190,226))
         self._sprite('bruno',(844,538),(170,206))
@@ -1138,7 +1197,7 @@ class Game:
                 self.paint.wrap(self.canvas,self.mission.description,254,210,754,18)
                 for i,goal in enumerate(self.mission.goals):
                     value,ok=goal_progress(self.pie,goal,self.mission.weather)
-                    y=277+i*79
+                    y=(265+i*68) if len(self.mission.goals)>3 else (277+i*79)
                     self.paint.rect(self.canvas,(251,y,774,69),
                                     (187,205,158) if ok else (230,215,183),5)
                     self.paint.text(self.canvas,('COMPLETE' if ok else 'IN PROGRESS')+
@@ -1450,6 +1509,9 @@ class Game:
             self.sfx('pop')
 
     def on_key(self,event):
+        if event.key==pygame.K_F10:
+            self.export_playtest_report()
+            return
         if event.key==pygame.K_F12:
             from datetime import datetime
             folder=default_path().parent/'screenshots'
@@ -1494,8 +1556,10 @@ class Game:
         elif self.scene=='presentation' and event.key in (pygame.K_SPACE,pygame.K_RETURN):
             self.advance_presentation()
 
-    def update(self, dt):
-        """Advance transient mud falls and settle any edits made during a fall."""
+    def update(self, dt, elapsed_dt=None):
+        """Advance capped animation and count uncapped real elapsed play time."""
+        elapsed_dt = dt if elapsed_dt is None else elapsed_dt
+        self.play_elapsed += elapsed_dt
         landed = False
         for anim in list(self.fall_animations):
             anim['elapsed'] += dt
@@ -1517,7 +1581,7 @@ class Game:
                 p[4] -= dt
             self.mud_flecks = [p for p in self.mud_flecks if p[4] > 0]
         if self.scene in ('clearing','craft','presentation','results','campaign','epilogue'):
-            self.campaign['seconds'] += dt
+            self.campaign['seconds'] += elapsed_dt
         if self.scene=='presentation' and hasattr(self,'collapsed'):
             who=self.names[self.presentation_step]
             if (self.collapsed.get(who,False) and not self.collapse_sound_played
@@ -1547,7 +1611,8 @@ class Game:
 
     def step_frame(self, dt: float):
         """Advance a single real game-loop frame, processing queued SDL events."""
-        self.update(max(0, min(float(dt), .05)))
+        elapsed_dt = max(0., float(dt))
+        self.update(min(elapsed_dt, .05), elapsed_dt)
         for event in pygame.event.get():
             self.handle_event(event)
         self.draw()
