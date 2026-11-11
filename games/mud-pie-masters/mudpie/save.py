@@ -45,8 +45,8 @@ def load_game(path: Path | None = None) -> dict:
             defaults["rivals"] = [next(r for r in saved_rivals if r.name == name)
                                    for name in ("Bruno", "Daisy")]
         defaults["round"] = max(1, min(100000, int(data.get("round", 1))))
-        defaults["gallery"] = data.get("gallery", [])[-60:] if isinstance(data.get("gallery"), list) else []
-        defaults["history"] = data.get("history", [])[-100:] if isinstance(data.get("history"), list) else []
+        defaults["gallery"] = [entry for entry in data.get("gallery", []) if isinstance(entry, dict)][-60:] if isinstance(data.get("gallery"), list) else []
+        defaults["history"] = [entry for entry in data.get("history", []) if isinstance(entry, dict)][-100:] if isinstance(data.get("history"), list) else []
         defaults["campaign"] = normalized_campaign(data.get("campaign"))
         if isinstance(data.get("settings"), dict):
             for key, value in data["settings"].items():
