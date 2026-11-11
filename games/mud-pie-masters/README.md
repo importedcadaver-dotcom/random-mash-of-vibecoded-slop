@@ -1,33 +1,21 @@
-# MUD PIE MASTERS · v0.6.1 QA Candidate (Not a 2-Hour Release)
+# MUD PIE MASTERS · v0.10.0-dev QA Candidate
 
-A fully offline Windows desktop crafting/competition game for Python 3.12 and **Pygame Community Edition**. Play as a baby brown bear competing with sibling cubs Bruno and Daisy. Nothing in the mud-pie contest is edible.
+An offline Windows Pygame crafting and competition game. Play as a baby brown bear competing with sibling cubs Bruno and Daisy. Mud pies are **inedible**.
 
-## Release status (read before playing)
+## Release status and current build
 
-**v0.6.0-dev is an automated-runtime-tested candidate retaining the v0.5 gameplay redesign with v0.4 provisional baby-cub artwork, NOT a verified two-hour release.** It has 36 unique main story contests, 12 optional woodland commissions, six chapters, chapter dialogue choices, scores, medals, weather challenges, a small unlock system, a free-build mode, and a finale. There are no artificial countdowns, stamina waits, or paywalls.
+The game has six chapters, 36 story contests, 12 optional commissions, free-build, sibling choices, a finale, falling mud, shapable petals and sticks, and an opt-in local F10 playtime report. [PRs #11–15](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/pulls?q=is%3Apr+is%3Amerged+Mud+Pie+Masters) addressed first-play feedback and added campaign pacing work. [Current QA review](QA_REVIEW_2026-11-11.md) records the remaining gaps.
 
-**Content target:** at least two hours of meaningful first-time gameplay for a typical player who completes the story and commissions. The content plan would reach 120 minutes at an **assumed** average of 2.5 minutes per 48 contests; this is only an illustrative planning assumption, **not a measured completion time**. Actual duration varies based on skill, retry attempts and design exploration. A human playthrough on Windows is still required before promising a two-hour experience.
+**This is a pre-release QA build, not a verified two-hour release.** Windows/Linux automated tests, dummy-SDL screenshots and a packaged EXE smoke do not demonstrate real mouse/audio quality or enjoyment. `gameplay_hours_verified=false`. [Issue #2](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/issues/2) remains open until a physical Windows check and an independently observed first-time human playtest establish at least 120 meaningful active minutes without grinding.
 
-The original game was built in a sandbox; **v0.6 has now run actual Pygame rendering and SDL event tests in GitHub Actions on Windows and Linux under dummy SDL video/audio**, with screenshot artifacts. This is not a human Windows desktop playtest, audio verification, FPS benchmark, or a certified two-hour experience. See `QA_RUNTIME_v0.6.md`, `QA_REPORT.md`, `ART_DIRECTION.md`, and `GAMEPLAY_TARGET.md`.
+## Download and test the latest Windows QA build
 
-## Install/update on Windows
+1. Open the [Windows package workflow](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/actions/workflows/mud-pie-masters-windows-build.yml). Select the newest successful run for `main` (after PR #16 merges).
+2. Under **Artifacts**, download `MudPieMasters-Windows-PreRelease`. GitHub may require sign-in. Extract the entire ZIP to a new folder, keeping `MudPieMasters.exe` beside `_internal`.
+3. Double-click `MudPieMasters.exe`. Try a fresh story, a sibling decision, all craft tools, results, settings/audio, resizing and a save/restart. F10 writes an optional local session report; it is not a human enjoyment measurement by itself.
+4. Record defects and honest playtime/quality notes in the open QA issue. A first personal play is optional until the requested release gate is met.
 
-The earlier setup was completed at `C:\Users\theam\MudPieMasters\.venv` with Python 3.12 and pygame-ce. **Keep that `.venv`**; the new ZIP contains source and assets, not its own Python environment.
-
-1. Download `MudPieMasters-v0.5.0.zip`.
-2. Extract the **contents** into `C:\Users\theam\MudPieMasters` (allow source file replacement). Back up your own edited source first, if you modified the previous version.
-3. In PowerShell, run the automated test command below. When ready to play, double-click `play.bat` or use the direct Python launch command.
-
-```powershell
-Set-Location "$HOME\MudPieMasters"
-.\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe tools\simulate_campaign.py
-.\.venv\Scripts\python.exe main.py
-```
-
-The launch command is optional until you are ready to play. These tests **do not require** you to play the game, and the Pygame smoke tests are designed to work with SDL dummy video/audio drivers.
-
-If dependencies are missing, `powershell -ExecutionPolicy Bypass -File .\setup.ps1` installs them. An optional Windows PyInstaller build script is at `build_windows.ps1`. The resulting `.exe` was not built/validated here.
+Python source users can run `python -m pytest -q`, `python tools/simulate_campaign.py`, and `python main.py` from the game folder after installing `requirements-dev.txt`. The old v0.5 ZIP installation instructions no longer describe the latest GitHub source.
 
 ## What the story includes
 
