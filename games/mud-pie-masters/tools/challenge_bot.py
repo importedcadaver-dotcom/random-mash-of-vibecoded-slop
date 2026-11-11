@@ -87,8 +87,12 @@ def design_for(challenge):
             pie.add_deco(kinds[0], i % count, .7, .6, angle=i * 60)
     # Shape goals must correspond to real altered decoration geometry,
     # not magically completed counters or ingredient-count padding.
+    shaped_kinds = set()
     for goal in challenge.goals:
         if goal.rule == 'shaped_decos_min':
+            if goal.kind in shaped_kinds:
+                raise ValueError('Duplicate shape goal for ingredient: ' + challenge.id)
+            shaped_kinds.add(goal.kind)
             matches = [d for d in pie.decorations if d.kind == goal.kind]
             if len(matches) < int(goal.target):
                 raise ValueError('Not enough shapeable decorations: ' + challenge.id)
