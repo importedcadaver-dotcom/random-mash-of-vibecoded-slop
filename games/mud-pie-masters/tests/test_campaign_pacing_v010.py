@@ -11,14 +11,17 @@ from tools.challenge_bot import design_for
 
 
 def test_four_story_or_side_creative_briefs_use_real_decoration_shaping():
+    """Shaped missions remain visible without dropping the finale's skill goal."""
     shaped=[c for c in CHALLENGES if any(g.rule=="shaped_decos_min" for g in c.goals)]
     assert len(shaped)==4
     assert {"story-02-01","story-03-02","story-05-06","side-03-01"}=={c.id for c in shaped}
-    assert all(len(c.goals)<=3 for c in CHALLENGES), "Existing goals overlay supports three."
+    assert all(len(c.goals)<=3 for c in shaped)
+    assert max(len(c.goals) for c in CHALLENGES)==4  # Finale adds a legacy skill goal.
 
 
 @pytest.mark.parametrize("kind",["petals","sticks"])
 def test_shape_goal_requires_actual_widening_or_flattening(kind):
+    """A shape goal counts altered geometry and survives a save round trip."""
     pie=Pie()
     pie.add_layer()
     d1=pie.add_deco(kind,0,-.3,.4)
@@ -34,6 +37,7 @@ def test_shape_goal_requires_actual_widening_or_flattening(kind):
 
 
 def test_each_added_mission_is_achievable_in_data_model_oracle():
+    """Every added brief has a reachable synthetic pie for logic QA."""
     for challenge in CHALLENGES:
         if not any(g.rule=="shaped_decos_min" for g in challenge.goals):
             continue
@@ -42,6 +46,7 @@ def test_each_added_mission_is_achievable_in_data_model_oracle():
 
 
 def test_playtest_report_is_explicit_local_opt_in_not_an_enjoyment_certification(monkeypatch,tmp_path):
+    """Real SDL input exports timing without treating it as human validation."""
     os.environ.setdefault("SDL_VIDEODRIVER","dummy")
     os.environ.setdefault("SDL_AUDIODRIVER","dummy")
     pygame=pytest.importorskip("pygame")
@@ -64,6 +69,8 @@ def test_playtest_report_is_explicit_local_opt_in_not_an_enjoyment_certification
         game.submit()
         for _ in range(3):
             game.advance_presentation()
+        assert game.timer==pytest.approx(3.0)  # Animation remains capped.
+        assert game.campaign["seconds"]>=7315  # Measurement uses uncapped time.
         assert game.history and game.history[-1]["craft_seconds"]>=14
         assert game.history[-1]["round_seconds"]>=14
         file=game.export_playtest_report()
@@ -80,5 +87,11 @@ def test_playtest_report_is_explicit_local_opt_in_not_an_enjoyment_certification
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN,key=pygame.K_F10,mod=0,unicode=""))
         game.step_frame(1/60)
         assert (tmp_path/"playtest_report.json").is_file()
+        game.history.extend([None, {"scores": None, "craft_seconds": "bad"}])
+        assert game.export_playtest_report() is not None
+        damaged=json.loads((tmp_path/"playtest_report.json").read_text(encoding="utf-8"))
+        assert damaged["recorded_contests"]==2
+        assert damaged["recorded_craft_seconds"]>=14
+        assert damaged["rounds"][-1]["player_score"] is None
     finally:
         pygame.quit()
