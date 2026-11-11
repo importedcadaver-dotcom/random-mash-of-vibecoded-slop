@@ -7,7 +7,7 @@ A collection of small, standalone games built with AI coding agents.
 | Game | Status | Location |
 |---|---|---|
 | Clash of Cubs | Playable prototype | [`games/clash-of-cubs/`](games/clash-of-cubs/) |
-| Mud Pie Masters | v0.5 source imported; Windows/two-hour verification pending | [`games/mud-pie-masters/`](games/mud-pie-masters/) |
+| Mud Pie Masters | v0.10 QA candidate; Windows CI package passed, physical Windows and two-hour human playtest pending | [`games/mud-pie-masters/`](games/mud-pie-masters/) |
 
 ## Working with agents
 
