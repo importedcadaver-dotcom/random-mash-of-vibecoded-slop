@@ -428,10 +428,11 @@ class Game:
             visual, fall = collapse_if_needed(entry, weather=self.mission.weather if self.mission else 'clear')
             self.display_entries.append(visual)
             self.collapsed[self.names[idx]] = fall
-            recent = [h.get('signatures', {}).get(self.names[idx], '') for h in self.history]
+            recent = [(h.get('signatures') if isinstance(h.get('signatures'), dict) else {}).get(self.names[idx], '')
+                      for h in self.history if isinstance(h, dict)]
             # Old saves predate the per-competitor signature history.
             if idx == 0 and not any(recent):
-                recent = [item.get('signature', '') for item in self.gallery]
+                recent = [item.get('signature', '') for item in self.gallery if isinstance(item, dict)]
             self.judgments.append(judge(entry, self.theme[2], recent, weather=self.mission.weather if self.mission else 'clear'))
         # A crafting notification must not obscure the next scene's heading.
         self.toast_time = 0
@@ -596,7 +597,7 @@ class Game:
         self.button((443,521,284,54),'MY SCRAPBOOK',lambda:setattr(self,'scene','gallery'))
         self.button((96,593,235,42),'SETTINGS',lambda:self.show_overlay('settings'),small=True)
         self.paint.text(self.canvas,f"Round {self.round_no} · {int(self.campaign['seconds']//60)} min in game",(348,605),16,INK)
-        self.paint.text(self.canvas,'F10: Export local playtest report (timing only)',(96,628),14,INK)
+        self.paint.text(self.canvas,'F10: Export local playtest report (timing only)',(348,630),14,INK)
         self._sprite('player',(956,400),(330,396))
         self._sprite('daisy',(1127,517),(190,226))
         self._sprite('bruno',(844,538),(170,206))
