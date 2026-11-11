@@ -33,6 +33,7 @@ jobs:
           test -f main.py || { echo 'Mud Pie Masters source not imported yet'; exit 1; }
           test -d assets && test -d tests && test -d mudpie
       - name: Install
+        id: install
         run: python -m pip install -r requirements-dev.txt
       - name: Logic and headless Pygame tests
         env:
@@ -45,7 +46,7 @@ jobs:
           SDL_AUDIODRIVER: dummy
         run: python tools/simulate_campaign.py
       - name: SDL event-driven gameplay walkthrough and screenshots
-        if: always()  # Preserve screenshot diagnostics if earlier tests fail.
+        if: ${{ always() && steps.install.outcome == 'success' }}  # Diagnose test failures after a successful install.
         env:
           SDL_VIDEODRIVER: dummy
           SDL_AUDIODRIVER: dummy
@@ -59,13 +60,13 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
       - name: Complete all 48 contests in actual Pygame runtime
-        if: always()
+        if: ${{ always() && steps.install.outcome == 'success' }}  # Diagnose test failures after a successful install.
         env:
           SDL_VIDEODRIVER: dummy
           SDL_AUDIODRIVER: dummy
         run: python tools/full_campaign_runtime.py --output qa-artifacts/full-campaign
       - name: Upload full campaign screenshots and audit JSON
-        if: always()
+        if: ${{ always() && steps.install.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
           name: mudpie-full-campaign-${{ matrix.os }}
