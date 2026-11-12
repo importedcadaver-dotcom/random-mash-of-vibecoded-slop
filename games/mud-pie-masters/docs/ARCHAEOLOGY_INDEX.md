@@ -47,7 +47,7 @@ This is a **navigation, provenance and exceptions index**, not a replacement for
 | Falling mud YES; unsupported static floating mud NO | Latest explicit owner correction, partially implemented | Issue #9, PR #13, models.py |
 | Mud squish, shape/flatten, Daisy/Bruno expressions are attractive features | Confirmed positive player feedback | First Windows Chapter 1 session |
 | Petals/sticks may be reshaped, rotated and saved | Explicit user request; implemented | PR #14, Decoration fields in models.py |
-| Original Daisy artwork is a strong benchmark; avoid generic teddy/dog/mascot replacements | Creator preference; **new sprite replacements not approved** | Later owner feedback and proposed sprite lab spec |
+| Existing Mud Pie Masters cub sprites are valued production placeholders; **Bruno** is the leading individual cuteness benchmark (preferred over player and Daisy) | Latest explicit creator preference; **new sprite replacements not approved** | Newer Nov 11 character-art feedback, after initial Windows feedback |
 | Every mission is pleasurable, and two-hour duration has passed | **Unverified** (do not state as fact) | Issue #2 stays open |
 | 20-year game history exists | **Fictional audit framing only** | Current directive |
 
@@ -56,12 +56,37 @@ This is a **navigation, provenance and exceptions index**, not a replacement for
 - **High / maintainability:** game.py is ~88 KB and owns scene transitions, input, layout, animations, sound and gameplay coordination. This is a *coupling risk*, not proof that a rewrite would be safer. Inventory entry points and introduce seam-level tests before proposing a split.
 - **Medium / historical scoring concern requiring rerun:** original v0.4 fun audit found a generic recipe effective across too many contests, bare tiers scoring 99 symmetry, and limited rotation effect. Current judging.py now caps bare symmetry, scores angle-aware pairs, applies repetition penalties and theme weights. **Do not repeat those old findings as current bugs without rerunning adversarial strategies**.
 - **Medium / gameplay experience:** craft, judge and rival systems are largely deterministic, but actual player satisfaction, challenge variety and living sibling agency remain unverified. The 48-round oracle bypasses most real mouse crafting.
-- **Medium / art approval:** current judges are programmatic color variants of cub art at runtime; the original tracked Petal/Boulder/Fern PNGs are NOT necessarily what the game presents. The user rejected generic teddy-bear judges in the first test. Confirm new portraits at display size before claiming accepted.
+- **Medium / art approval:** current judges are programmatic color variants of cub art at runtime; the original tracked Petal/Boulder/Fern PNGs are NOT necessarily what the game presents. The user rejected generic teddy-bear judges in the first test. **Bruno is now the preferred reference**, despite Daisy also receiving earlier praise. Confirm new portraits at display size before claiming accepted.
 - **Medium / text and layout:** current SDL screenshots show a much more structured interface than the first Windows build; their small text, visual density and resized behavior still require real human usability testing. Passing a screenshot generation check is not proof of legibility.
 - **Low / stale documentation:** older ART_DIRECTION.md says UI labels are monospaced, while current rendering.py uses a minimum 14 px Verdana body font. Historical document should remain dated and be clearly tagged as not authoritative for current typography.
 - **Low / stale metadata:** game.json still describes a 20-screenshot walkthrough, although latest main run produced 26. Correct this factual version drift in the first documentation repair PR.
 - **Low / root instructions stale:** root AGENTS.md refers to branch protection still needing setup, but repository ruleset #26908579 is active and Issue #5 closed. Root is a shared file; coordinate before altering.
 - **Verified bug, repair underway:** rivals.py used unordered set iteration when Daisy borrowed previous ingredients, breaking reproducibility across PYTHONHASHSEED. Verified with 4 distinct hash seeds using archived, source-matching code. Repair is a sorted ingredient list with cross-process test in this archaeology PR.
+
+### Current creator-art decisions — chronological correction
+
+The first Windows playtest praised **both Bruno and Daisy's expressive characterization and designs**, but later comparative sprite feedback (November 11, 2026) established a more specific ordering: **Bruno is cuter than the player cub, and Daisy is the least cute of the three**. This later preference supersedes an earlier *Daisy-first* benchmark used during experimental art ideation; it does **not** revoke the favorable playtest observations or authorize deleting Daisy's assets.
+
+- **Approved preference:** preserve all current Mud Pie Masters cubs as attractive, usable placeholders. Treat Bruno as the primary individual character-art reference. Aim for purposefully overlapping, asymmetric, individually shaped cutout/collage parts with clear attached limbs and readable expressions, rather than uniform circular/elliptical mascot construction. `South Park: The Stick of Truth` is a *structural visual analogy*, not permission to reproduce licensed characters.
+- **Explicitly rejected:** both E1 face variants; all three E2 circular/lumpy silhouettes; blush added to new sprites. Relative praise for the wider eyes of one rejected E1 variant was **not** approval. Do not cite Bramble as a preferred art benchmark.
+- **Unapproved / experimental:** any new E3 layered reconstruction, new judge portraits, replacements of production cub sprites, or quadruped variants. Standing and all-fours may both be explored later; neither a new pose nor a new E3 asset has cleared owner review.
+- **Source boundary:** latest art feedback was recovered from creator-authored project history/notes outside this public repository. The detailed personal chat and unrelated image artifacts are **not** embedded here. This is a compact decision register, not a claim every historical conversation/image was recovered.
+
+### Feature-to-implementation-to-test matrix (source inspection)
+
+| Behavior | Production source | Relevant automated evidence | Unverified acceptance |
+|---|---|---|---|
+| Mud scoop, knead/workable threshold and finite-volume shape/flatten | `mudpie/models.py`, `mudpie/game.py` | `test_models.py`, `test_first_play_rescue.py`, `test_pygame_smoke.py` | Physical mouse feel, tutorial comprehension without coaching |
+| Unsupported tier falling/cascades and continuing after collapse | `mudpie/models.py`, `mudpie/game.py`, `mudpie/rendering.py` | `test_falling_mud.py` (model + real queued SDL events) | Believable full contact/stacking on physical Windows; this is a center-support approximation, not soft-body physics |
+| Petal/stick reshape, rotation, color picker and undo | `mudpie/models.py`, `mudpie/game.py`, `mudpie/rendering.py` | `test_decor_shape_v09.py`, `test_ui_controls_v07.py` | Discoverability and quality of actual artwork |
+| Authored missions, unlock conditions and scoring objectives | `mudpie/campaign.py` | `test_campaign.py`, `test_campaign_pacing_v010.py` | Whether 48 contests avoid repetition for real people |
+| Deterministic judges, geometry-aware scores, repeat penalties | `mudpie/judging.py` | `test_judging.py`, `test_fun_redesign.py` | Perceived fairness, exploit resilience with real legal mouse strategies |
+| Sibling response, next-round pie design and relationship memory | `mudpie/rivals.py` | `test_rivals_save.py`, `test_daisy_determinism.py` | Whether Bruno/Daisy feel genuinely autonomous and distinct over extended play |
+| JSON save history, recovery and campaign persistence | `mudpie/save.py` | `test_rivals_save.py`, `test_damaged_save_recovery.py` | Real user save migration/compatibility; **non-object JSON root guard proposed in PR #20, not yet treated as merged here** |
+| Menus, contextual guide, mouse hitboxes, aspect letterboxing | `mudpie/game.py` | `test_runtime_events.py`, `test_first_play_rescue.py`, `test_pygame_smoke.py` | First-time navigation, text readability, touch/OS mouse behavior |
+| Full story loop, screenshots and Windows package | `tools/runtime_walkthrough.py`, `tools/challenge_bot.py`, GitHub Actions | 48 oracle-built Pygame contests with judging/save reloads; 26 Windows-hosted SDL-dummy walkthrough screenshots; Windows EXE dummy-SDL smoke | Physical Windows/audio validation; **120 active enjoyable human minutes** |
+
+**Interpretation:** a passing automated test establishes only what its assertions actually check. These links are a *coverage navigation map*, not a full independent review of test quality. Prior `FUN_AUDIT_v0.4.md` exploit findings require fresh reproduction against the current rules and input paths rather than automatic carryover.
 
 ## 5. Historical milestones (verified repo chronology)
 
