@@ -2,15 +2,15 @@
 
 **Date:** November 11, 2026 (Pacific).  
 **Workstream:** Mossbyte / ChatGPT GPT-6 / PR #26.  
-**Evidence commit:** [`195cadd`](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/commit/195cadd056d364b946854634f970445cb9a4e972).  
-**CI:** [Windows + Linux workflow #43160489313](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/actions/runs/43160489313).  
+**Evidence:** First full 48-goal legal craft run at [`195cadd`](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/commit/195cadd056d364b946854634f970445cb9a4e972); expanded all-48 menu-click routing on PR #26 at [`8207bf9`](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/commit/8207bf9ed3d8b0a923eb8be2b23b7d1b8e7e6348).  
+**CI:** [First all-48 crafting proof #43160489313](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/actions/runs/43160489313) and [full menu+crafting proof #43161181173](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/actions/runs/43161181173) (Windows/Linux pytest logic passed).  
 **Outcome:** **48/48 goal-feasible contests and commissions through scripted SDL keyboard/mouse events on both OSes**, subject to the exact scope below. No release/playtime certification.
 
 ## What the new proof actually demonstrates
 
 Previous `tools/full_campaign_runtime.py` used `challenge_bot.design_for()` to **assign prebuilt Pie objects** directly into the live game's model. It validated the Pygame scene/presentation loop, 48 goal sets, medals, save persistence and finale, but did not establish that player gestures could assemble those objects.
 
-PR #26 adds `tools/legal_mouse_campaign.py` and `tests/test_legal_mouse_campaign.py`, which construct **all 36 authored story pies and all 12 side-commission pies through ordered SDL events delivered to the production `Game.step_frame()` dispatcher**:
+PR #26 adds `tools/legal_mouse_campaign.py` and `tests/test_legal_mouse_campaign.py`, which **enter all 36 authored story contests and all 12 side commissions through the title screen, chapter tabs and map's real hitboxes, then construct and submit the pies through ordered SDL events delivered to the production `Game.step_frame()` dispatcher**:
 
 - Drag mud from the real ingredient tray to the workbench to create each layer.
 - Drag real tiers with Scoop/Mix to knead mud to workable state.
@@ -25,7 +25,7 @@ PR #26 adds `tools/legal_mouse_campaign.py` and `tests/test_legal_mouse_campaign
 
 **Forbidden shortcuts:** no `Pie.add_layer`, `Pie.add_deco`, direct `game.pie` replacement, `challenge_bot` injection, direct medal awards or direct campaign advancement. Every constructed ingredient and its transformations go through the production mouse/keyboard handler. Test scripts may **read** model geometry and objective values to choose coordinates, but not mutate gameplay state.
 
-**Explicit shortcut that remains:** the test fixture calls `Game.begin_round(challenge.id)` to select each authored mission without navigating the chapter map's mouse menus. Once the clearing opens, chapter response, Workbench entry, crafting, submission and presentation are all dispatched through SDL. Therefore the result establishes **crafted-goal reachability**, not comprehensive 48-mission **menu-navigation** proof.
+**No internal mission-selection shortcut remains:** the runner clicks **Title → Chapter Map → correct chapter tab → story Play button or optional Commission button** for each of the 48 missions, then clicks the optional chapter response and Workbench entry. The 36th story result is followed by the actual **View Forest Finale → Title** button path. The bot does use read-only internal geometry and goal status to plan inputs, so navigation is verified through buttons while human discoverability is not.
 
 ## Repeatable results
 
@@ -65,7 +65,7 @@ The CLI saves `legal_mouse_campaign.json` with each challenge's individual goal 
 
 - [x] All 48 authored mission goals mechanically reachable through legal SDL input, with no direct pie injection.
 - [x] Save progression, score publication and contest presentation on both Windows and Linux automated runners.
-- [ ] Confirm complete map/menu/mission selection through real clicks for all 48; the current fixture bypasses this only.
+- [x] All 48 challenge/commission selections through real title, chapter-tab and map buttons, plus finale-return navigation.
 - [ ] Adversarial scoring stress that accounts for legal color/material and physical crafting actions (not only goal feasibility).
 - [ ] Human first-time onboarding observation, full campaign gameplay pacing and 120 **meaningful active** minutes.
 - [ ] Physical Windows DPI, mouse, keyboard, audio and visual quality test; final creator art approval.
