@@ -1,10 +1,9 @@
 """48-challenge legal-input crafting probe, without model-generated player pies.
 
-Mission selection uses Game.begin_round as a *test fixture* (not mouse menu
-navigation). After entering the clearing, all player crafting, chapter
-decisions, submission, and presentation actions use pygame SDL events passed
-through Game.step_frame(). No Pie.add_layer/add_deco, direct state mutation,
-challenge_bot or medal injection is permitted.
+Mission selection, chapter tabs, chapter decisions, player crafting, submission,
+finale navigation, and presentation use Pygame SDL events passed through
+Game.step_frame(). No Pie.add_layer/add_deco, direct state mutation,
+challenge_bot, mission fixture shortcut or medal injection is permitted.
 
 This is an adaptive scripted bot; it demonstrates mechanical reachability only,
 NOT human discoverability, enjoyment, physical Windows interaction or 120 min.
@@ -84,6 +83,29 @@ def missions_in_order():
         missions.extend(SIDES[chapter * 2:(chapter + 1) * 2])
     assert len(missions) == 48
     return missions
+
+
+def enter_mission_through_buttons(bot, mission):
+    """Use only actual title, chapter-tab and mission button hitboxes."""
+    g = bot.game
+    if g.scene == "results":
+        bot.click(190, 692)  # BACK TO TITLE
+    bot.require(g.scene == "title", f"{mission.id}: cannot reach title menu")
+    bot.click(565, 479)  # CHAPTER MAP
+    bot.require(g.scene == "campaign", f"{mission.id}: cannot open chapter map")
+    bot.click(20 + 209 * mission.chapter + 99, 132)  # Unlocked chapter tab.
+    bot.require(g.chapter_view == mission.chapter,
+                f"{mission.id}: chapter tab is unexpectedly locked")
+    if mission.side:
+        index = SIDES.index(mission) % 2
+        bot.click(41 + index * 608 + 290, 664)  # Commission button.
+    else:
+        index = STORY.index(mission) % 6
+        x = 41 + (index % 2) * 613
+        y = 271 + (index // 2) * 100
+        bot.click(x + 480, y + 66)  # PLAY CONTEST.
+    bot.require(g.scene == "clearing" and g.mission is mission,
+                f"{mission.id}: chapter-map button did not select this contest")
 
 
 class CraftPlanner:
@@ -357,10 +379,9 @@ def execute(output: Path, limit: int = 48) -> dict:
         for number, mission in enumerate(selected, 1):
             active = mission.id
             before = g.campaign["next_story"]
-            # Mission setup is the only direct game call: crafting and
-            # progression use the same SDL events as normal play.
-            g.begin_round(mission.id)
-            g.draw()
+            # The complete mission-entry path is now also SDL-driven:
+            # title -> map -> chapter tab -> challenge/commission button.
+            enter_mission_through_buttons(bot, mission)
             if g.overlay == "chapter":
                 bot.click(390, 582)
             bot.require(g.scene == "clearing" and g.overlay is None,
@@ -389,6 +410,15 @@ def execute(output: Path, limit: int = 48) -> dict:
             saved = load_game()
             bot.require(saved["campaign"]["next_story"] == expected,
                         f"{active}: progression not persisted")
+            if g.campaign["next_story"] == 36 and not mission.side:
+                # The final story contest's real results button must expose
+                # its family epilogue. Side missions still remain afterward.
+                bot.click(1034, 692)
+                bot.require(g.scene == "epilogue",
+                            f"{active}: finale button did not open epilogue")
+                bot.click(956, 617)  # TITLE from the epilogue.
+                bot.require(g.scene == "title",
+                            f"{active}: finale could not return to title")
             successes.append({
                 "mission": active,
                 "medals": g.mission_medals,
@@ -404,13 +434,13 @@ def execute(output: Path, limit: int = 48) -> dict:
             })
         return {
             "passed": True, "method": "SDL mouse/keyboard gameplay construction (no pie injection)",
-            "mission_selection": "Game.begin_round fixture API, not map-button navigation",
+            "mission_selection": "SDL title, chapter tabs and chapter-map challenge/commission buttons",
             "rounds": len(successes), "events": bot.input_events,
             "actions": len(bot.actions), "scores": successes,
             "limitations": [
                 "Scripted bot, not independent human play or subjective fun testing",
                 "Headless SDL video/audio, no physical Windows mouse or speakers",
-                "Challenge selected with internal fixture API; construction and submission SDL-driven",
+                "Challenge selected through actual chapter-map mouse buttons; no internal fixture API",
                 "Live model goal feedback is read-only, not inferred from a human-facing image",
                 "Does not establish 120 minutes of active meaningful play",
             ],
@@ -447,7 +477,7 @@ def main():
         json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(f"PASS: {report['rounds']} SDL-input-constructed contest pies; "
           f"{report['events']} SDL events, no model-injected pies.")
-    print("NOT human play, full menu navigation or two-hour gameplay certification.")
+    print("NOT human play, independent usability testing or two-hour gameplay certification.")
 
 
 if __name__ == "__main__":
