@@ -100,7 +100,7 @@ The first Windows playtest praised **both Bruno and Daisy's expressive character
 - **Nov 9–11:** PRs #11–15 integrated first-play fixes, UI controls, falling mud, art/decoration shaping, and four additional shape-based challenge conditions with local report timing.
 - **Nov 11:** PR #16 repaired malformed save handling, title-report hint collision, and CI diagnostic dependencies. PR #17 corrected the root game status. Main ruleset is active and baseline main CI is green.
 - **Nov 11 (later):** PRs #19–22 merged: archaeology evidence index, Daisy deterministic replay, non-object JSON root recovery, corrected Bruno-first art chronology, system/test coverage and preserved original asset gallery. PR #23 further repaired partial save recovery; Windows/Linux CI passed 192 tests per OS.
-- **Nov 11 (late):** PR #26 adds separate scripted SDL mouse/keyboard construction for all 48 authored missions; no Pie injection. See [legal-input campaign QA](LEGAL_MOUSE_CAMPAIGN_QA.md). It bypasses chapter-map selection through a fixture and does not certify human play.
+- **Nov 11 (late):** PR #26 adds separate scripted SDL mouse/keyboard construction for all 48 authored missions; no Pie injection. See [legal-input campaign QA](LEGAL_MOUSE_CAMPAIGN_QA.md). It now selects all 48 contests via the actual chapter-map buttons; it still does not certify human play.
 - **Current:** Human 120-minute completion, actual Windows/audio input and final subjective art acceptance remain open.
 
 ## 6. Genre research — transferable, not automatically approved
