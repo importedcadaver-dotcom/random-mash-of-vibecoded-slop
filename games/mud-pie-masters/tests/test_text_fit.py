@@ -52,6 +52,9 @@ def test_craft_palette_and_mud_hint_fit_existing_sidebar(monkeypatch, tmp_path):
         monkeypatch.setattr(game.paint, "text", capture)
         game.draw()
         assert {value for value, _ in seen} == {"drag to add", "COLOR 1/2 · PICK"}
+        # Neither label should require truncation in the actual supported font.
+        assert game.paint.font(16, True).size("COLOR 1/2 · PICK")[0] <= 174
+        assert game.paint.font(12).size("drag to add")[0] <= 233 - 135 - 8
         mud_rect = game._palette_rect(0)
         hint = next(rect for value, rect in seen if value == "drag to add")
         picker = next(rect for value, rect in seen if value == "COLOR 1/2 · PICK")
