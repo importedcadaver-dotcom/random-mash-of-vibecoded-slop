@@ -1,16 +1,14 @@
-"""A first chapter built using actual SDL mouse/keyboard gestures, not oracle Pie injection."""
+"""All 48 Mud Pie Masters goals via production SDL mouse/keyboard gestures."""
 from __future__ import annotations
-
-import json
 
 from tools.legal_mouse_campaign import execute
 
 
-def test_all_six_first_chapter_contests_and_two_commissions_via_sdl_events(tmp_path):
-    evidence = execute(tmp_path / "legal-mouse", limit=8)
+def test_all_48_contests_and_commissions_are_constructible_using_sdl_input(tmp_path):
+    evidence = execute(tmp_path / "legal-mouse", limit=48)
     assert evidence["passed"]
-    assert evidence["rounds"] == 8
-    assert evidence["events"] > 60
+    assert evidence["rounds"] == 48
+    assert evidence["events"] > 200
     assert evidence["mission_selection"].startswith("Game.begin_round")
     assert all(goal["value"] >= goal["target"]
                for entry in evidence["scores"]
