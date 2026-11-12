@@ -96,7 +96,8 @@ The first Windows playtest praised **both Bruno and Daisy's expressive character
 - **Nov 9/10:** First unscripted Windows test reached Chapter 1 first results and exposed mixing, text/goal collision, choice bias, early locked drying guidance, and artwork issues. User praised specific squish/shaping and sibling moments.
 - **Nov 9–11:** PRs #11–15 integrated first-play fixes, UI controls, falling mud, art/decoration shaping, and four additional shape-based challenge conditions with local report timing.
 - **Nov 11:** PR #16 repaired malformed save handling, title-report hint collision, and CI diagnostic dependencies. PR #17 corrected the root game status. Main ruleset is active and baseline main CI is green.
-- **Nov 11 (later):** PR #19 merged the archaeological evidence index, deterministic Daisy recipe repair and screenshot metadata correction; PR #20 merged the guard and six parameterized tests for non-object JSON save roots. The feature/test coverage and art-history correction are in PR #21, pending its own review.\n- **Current:** Human 120-minute completion, actual Windows/audio input and final subjective art acceptance remain open.
+- **Nov 11 (later):** PR #19 merged the archaeological evidence index, deterministic Daisy recipe repair and screenshot metadata correction; PR #20 merged the guard and six parameterized tests for non-object JSON save roots. The feature/test coverage and art-history correction are in PR #21, pending its own review.
+- **Current:** Human 120-minute completion, actual Windows/audio input and final subjective art acceptance remain open.
 
 ## 6. Genre research — transferable, not automatically approved
 
