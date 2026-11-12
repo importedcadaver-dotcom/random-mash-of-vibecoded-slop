@@ -38,6 +38,10 @@ def load_game(path: Path | None = None) -> dict:
                                            "tutorial_seen": False}}
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
+        # Valid JSON need not be an object. Ignore malformed root values
+        # instead of raising AttributeError before the version check.
+        if not isinstance(data, dict):
+            return defaults
         if data.get("version") != VERSION:
             return defaults
         saved_rivals = [Rival(**r) for r in data.get("rivals", [])]
