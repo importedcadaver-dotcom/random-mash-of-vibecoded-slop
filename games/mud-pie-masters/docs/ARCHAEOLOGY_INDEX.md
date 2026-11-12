@@ -59,9 +59,9 @@ This is a **navigation, provenance and exceptions index**, not a replacement for
 - **Medium / art approval:** current judges are programmatic color variants of cub art at runtime; the original tracked Petal/Boulder/Fern PNGs are NOT necessarily what the game presents. The user rejected generic teddy-bear judges in the first test. **Bruno is now the preferred reference**, despite Daisy also receiving earlier praise. Confirm new portraits at display size before claiming accepted.
 - **Medium / text and layout:** current SDL screenshots show a much more structured interface than the first Windows build; their small text, visual density and resized behavior still require real human usability testing. Passing a screenshot generation check is not proof of legibility.
 - **Low / stale documentation:** older ART_DIRECTION.md says UI labels are monospaced, while current rendering.py uses a minimum 14 px Verdana body font. Historical document should remain dated and be clearly tagged as not authoritative for current typography.
-- **Low / stale metadata:** game.json still describes a 20-screenshot walkthrough, although latest main run produced 26. Correct this factual version drift in the first documentation repair PR.
+- **Resolved / metadata:** PR #19 corrected the obsolete game.json 20-screenshot description to the verified 26-screen main SDL-dummy walkthrough; keep future counts tied to specific run IDs.
 - **Low / root instructions stale:** root AGENTS.md refers to branch protection still needing setup, but repository ruleset #26908579 is active and Issue #5 closed. Root is a shared file; coordinate before altering.
-- **Verified bug, repair underway:** rivals.py used unordered set iteration when Daisy borrowed previous ingredients, breaking reproducibility across PYTHONHASHSEED. Verified with 4 distinct hash seeds using archived, source-matching code. Repair is a sorted ingredient list with cross-process test in this archaeology PR.
+- **Resolved / determinism:** PR #19 merged sorted iteration for Daisy's borrowed ingredients and a cross-process PYTHONHASHSEED regression test. The original defect had been reproduced with 4 hash seeds.
 
 ### Current creator-art decisions — chronological correction
 
@@ -82,7 +82,7 @@ The first Windows playtest praised **both Bruno and Daisy's expressive character
 | Authored missions, unlock conditions and scoring objectives | `mudpie/campaign.py` | `test_campaign.py`, `test_campaign_pacing_v010.py` | Whether 48 contests avoid repetition for real people |
 | Deterministic judges, geometry-aware scores, repeat penalties | `mudpie/judging.py` | `test_judging.py`, `test_fun_redesign.py` | Perceived fairness, exploit resilience with real legal mouse strategies |
 | Sibling response, next-round pie design and relationship memory | `mudpie/rivals.py` | `test_rivals_save.py`, `test_daisy_determinism.py` | Whether Bruno/Daisy feel genuinely autonomous and distinct over extended play |
-| JSON save history, recovery and campaign persistence | `mudpie/save.py` | `test_rivals_save.py`, `test_damaged_save_recovery.py` | Real user save migration/compatibility; **non-object JSON root guard proposed in PR #20, not yet treated as merged here** |
+| JSON save history, recovery and campaign persistence | `mudpie/save.py` | `test_rivals_save.py`, `test_damaged_save_recovery.py`, `test_save_root_validation.py` (**merged PR #20**) | Real user save migration/compatibility; physical Windows re-test remains open |
 | Menus, contextual guide, mouse hitboxes, aspect letterboxing | `mudpie/game.py` | `test_runtime_events.py`, `test_first_play_rescue.py`, `test_pygame_smoke.py` | First-time navigation, text readability, touch/OS mouse behavior |
 | Full story loop, screenshots and Windows package | `tools/runtime_walkthrough.py`, `tools/challenge_bot.py`, GitHub Actions | 48 oracle-built Pygame contests with judging/save reloads; 26 Windows-hosted SDL-dummy walkthrough screenshots; Windows EXE dummy-SDL smoke | Physical Windows/audio validation; **120 active enjoyable human minutes** |
 
@@ -96,7 +96,7 @@ The first Windows playtest praised **both Bruno and Daisy's expressive character
 - **Nov 9/10:** First unscripted Windows test reached Chapter 1 first results and exposed mixing, text/goal collision, choice bias, early locked drying guidance, and artwork issues. User praised specific squish/shaping and sibling moments.
 - **Nov 9–11:** PRs #11–15 integrated first-play fixes, UI controls, falling mud, art/decoration shaping, and four additional shape-based challenge conditions with local report timing.
 - **Nov 11:** PR #16 repaired malformed save handling, title-report hint collision, and CI diagnostic dependencies. PR #17 corrected the root game status. Main ruleset is active and baseline main CI is green.
-- **Current:** Human 120-minute completion, actual Windows/audio input and final subjective art acceptance remain open.
+- **Nov 11 (later):** PR #19 merged the archaeological evidence index, deterministic Daisy recipe repair and screenshot metadata correction; PR #20 merged the guard and six parameterized tests for non-object JSON save roots. The feature/test coverage and art-history correction are in PR #21, pending its own review.\n- **Current:** Human 120-minute completion, actual Windows/audio input and final subjective art acceptance remain open.
 
 ## 6. Genre research — transferable, not automatically approved
 
@@ -108,7 +108,7 @@ The first Windows playtest praised **both Bruno and Daisy's expressive character
 
 ## 7. Next checkpoints and gates
 
-1. Merge the narrowly scoped PR that fixes Daisy determinism, adds cross-process QA, corrects stale game.json screenshot metadata, and keeps this navigation index.
+1. Retain merged PR #19's Daisy determinism test and metadata repair and merged PR #20's malformed-save-root regression; keep this source-of-truth index synchronized with subsequent reviewed fixes.
 2. Recover remaining historical sprite generations with provenance; compare only at gameplay scale. Do not silently replace Daisy or use a generic mockup as a production asset.
 3. Build a current feature-to-code-to-test matrix, actual scene-by-scene visual audit and reproducible profiling. Separate known bugs from aesthetic opinions.
 4. Re-run adversarial judging tests under actual chapter restrictions and legal mouse actions; update old v0.4 findings with verified current behavior.
