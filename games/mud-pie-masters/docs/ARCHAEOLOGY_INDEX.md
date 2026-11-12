@@ -3,24 +3,25 @@
 **Audit owner:** Mossbyte — ChatGPT GPT-6 / MPM-MOSSBYTE-GPT6-001  
 **Snapshot:** November 11, 2026; main SHA 9d5bfc8d1985ab7b24a3139c320068c3ef1a3a22  
 **Tracking:** [Issue #18 — archaeology](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/issues/18)  
-**Status:** INITIAL INTAKE, not a completed exhaustive audit or final Master GDD.
+**Status:** IN-PROGRESS EVIDENCE INDEX, not a completed exhaustive audit. A separate source-labeled Master GDD now exists; physical Windows/human release gate remains open.
 
 This is a **navigation, provenance and exceptions index**, not a replacement for the already substantive project documents. The imaginary 20-year handoff is a method for skepticism, not the project's real age.
 
-**Visual asset gallery:** [original sprite/expression contact gallery, historic previews and runtime provenance](ASSET_VISUAL_INDEX.md). This links all original tracked images directly without replacing them and distinguishes current judges from legacy judge files.
+**Creative design and canon:** [Master Game Design & Canon Register](MASTER_GAME_DESIGN.md) is the sole forward-looking design reconstruction; it labels approved, implemented, rejected, deferred and unknown claims.
+\n**Visual asset gallery:** [original sprite/expression contact gallery, historic previews and runtime provenance](ASSET_VISUAL_INDEX.md). This links all original tracked images directly without replacing them and distinguishes current judges from legacy judge files.
 
 ## 1. Source-of-truth order and how to avoid duplicate documents
 
 1. **Latest explicit creator decisions** (including later corrections) govern creative direction; proposals from AI agents are not approvals.
 2. **Current game source, automated tests and reproduced runtime behavior** establish implemented mechanics—not whether they are enjoyable.
 3. [game.json](../game.json) records machine release/version metadata. Its two-hour flag is FALSE and is not inferred from content length.
-4. [PROJECT_MEMORY.md](../PROJECT_MEMORY.md) preserves historical approvals, limitations and change logs. Historical test counts are not current test results.
+4. [MASTER_GAME_DESIGN.md](MASTER_GAME_DESIGN.md) is the single source-labeled creative reconstruction; it does not override later creator corrections or the actual source. [PROJECT_MEMORY.md](../PROJECT_MEMORY.md) preserves dated approvals, limitations and change logs.
 5. [README.md](../README.md) explains current features, controls and how to run the latest pre-release build.
 6. [QA_REVIEW_2026-11-11.md](../QA_REVIEW_2026-11-11.md) describes the post-merge regression/CI evidence and known gaps.
 7. [ART_DIRECTION.md](../ART_DIRECTION.md) and [GAMEPLAY_TARGET.md](../GAMEPLAY_TARGET.md) include historical proposals, some pre-v0.10 statements. Their dates matter. The original v0.4 research remains at [FUN_AUDIT_v0.4.md](FUN_AUDIT_v0.4.md); it must not override current code.
 8. Existing [genre/review research](../GENRE_RESEARCH_AND_REVIEW.md) and [campaign QA](../QA_CAMPAIGN_v0.10.md) are reference reports, not proof of personal artistic or human playtime acceptance.
 
-**Do not generate additional parallel 'master' specs until the overlaps above are reconciled.** For each future claim, cite an owner decision, current code test, and/or clearly labeled proposal.
+**Avoid parallel or competing master specs.** The Master GDD now fills the previously missing role; the other records retain historical, technical, QA or usage scopes. For each future claim, cite a creator decision, actual implementation/test, or clearly labeled proposal.
 
 ## 2. Evidence inventory (current audit pass)
 
@@ -98,7 +99,7 @@ The first Windows playtest praised **both Bruno and Daisy's expressive character
 - **Nov 9/10:** First unscripted Windows test reached Chapter 1 first results and exposed mixing, text/goal collision, choice bias, early locked drying guidance, and artwork issues. User praised specific squish/shaping and sibling moments.
 - **Nov 9–11:** PRs #11–15 integrated first-play fixes, UI controls, falling mud, art/decoration shaping, and four additional shape-based challenge conditions with local report timing.
 - **Nov 11:** PR #16 repaired malformed save handling, title-report hint collision, and CI diagnostic dependencies. PR #17 corrected the root game status. Main ruleset is active and baseline main CI is green.
-- **Nov 11 (later):** PR #19 merged the archaeological evidence index, deterministic Daisy recipe repair and screenshot metadata correction; PR #20 merged the guard and six parameterized tests for non-object JSON save roots. The feature/test coverage and art-history correction are in PR #21, pending its own review.
+- **Nov 11 (later):** PRs #19–22 merged: archaeology evidence index, Daisy deterministic replay, non-object JSON root recovery, corrected Bruno-first art chronology, system/test coverage and preserved original asset gallery. PR #23 further repaired partial save recovery; Windows/Linux CI passed 192 tests per OS.
 - **Current:** Human 120-minute completion, actual Windows/audio input and final subjective art acceptance remain open.
 
 ## 6. Genre research — transferable, not automatically approved
@@ -111,7 +112,7 @@ The first Windows playtest praised **both Bruno and Daisy's expressive character
 
 ## 7. Next checkpoints and gates
 
-1. Retain merged PR #19's Daisy determinism test and metadata repair and merged PR #20's malformed-save-root regression; keep this source-of-truth index synchronized with subsequent reviewed fixes.
+1. Maintain merged PRs #19–23 (Daisy determinism, save recovery, art provenance/asset catalog and test coverage). Keep this index and [Master GDD](MASTER_GAME_DESIGN.md) synchronized with later verified corrections.
 2. Recover remaining historical sprite generations with provenance; compare only at gameplay scale. Do not silently replace Daisy or use a generic mockup as a production asset.
 3. Build a current feature-to-code-to-test matrix, actual scene-by-scene visual audit and reproducible profiling. Separate known bugs from aesthetic opinions.
 4. Re-run adversarial judging tests under actual chapter restrictions and legal mouse actions; update old v0.4 findings with verified current behavior.

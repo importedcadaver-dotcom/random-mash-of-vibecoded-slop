@@ -1,6 +1,6 @@
 # MUD PIE MASTERS · v0.10.0-dev QA Candidate
 
-**Project archaeology / evidence provenance:** [Initial source-of-truth index](docs/ARCHAEOLOGY_INDEX.md) · [Tracked audit #18](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/issues/18). This is an in-progress historical audit, not a released game or final design approval.
+**Design source of truth:** [Master Game Design & Canon Register](docs/MASTER_GAME_DESIGN.md) · [Archaeology/evidence index](docs/ARCHAEOLOGY_INDEX.md) · [Original sprite gallery](docs/ASSET_VISUAL_INDEX.md) · [Tracked audit #18](https://github.com/importedcadaver-dotcom/random-mash-of-vibecoded-slop/issues/18). The design register distinguishes approved creator decisions from implementation, historical observations and unresolved proposals. The audit is in progress; the game is not released or artistically certified.
 
 An offline Windows Pygame crafting and competition game. Play as a baby brown bear competing with sibling cubs Bruno and Daisy. Mud pies are **inedible**.
 
