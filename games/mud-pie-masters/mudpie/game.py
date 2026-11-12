@@ -789,7 +789,7 @@ class Game:
             if not self.allowed_ingredient(kind):
                 self.paint.text(self.canvas,'NOT TODAY',(rect.x+144,rect.y+11),11,(171,77,65),bold=True)
             if kind=='mud':
-                self.paint.text(self.canvas,'drag to add tier',(rect.x+135,rect.y+11),12,(130,106,84))
+                self.paint.text(self.canvas,'drag to add',(rect.x+135,rect.y+11),12,(130,106,84))
         self.paint.rect(self.canvas,(1039,107,221,579),CREAM,20,(121,92,64),2,alpha=245)
         self.paint.text(self.canvas,'PIE REPORT',(1054,119),20,DARK,bold=True)
         stab=evaluate_stability(self.pie, weather=self.mission.weather if self.mission else 'clear')
@@ -817,7 +817,7 @@ class Game:
             self.paint.text(self.canvas,'CREATIVE MEADOW',(1055,335),17,DARK,bold=True)
             self.paint.wrap(self.canvas,'Build anything! Nothing is graded.',1055,367,183,15)
         self.button((1054,431,190,34),
-                    f'COLOR {self.color_variant+1}/{unlocked_colors(self.campaign)} - CHOOSE',
+                    f'COLOR {self.color_variant+1}/{unlocked_colors(self.campaign)} · PICK',
                     self.open_colors,small=True)
         if self.campaign['next_story'] >= 6:
             self.paint.text(self.canvas,'M: Twin decor '+('ON' if self.mirror_mode else 'OFF'),

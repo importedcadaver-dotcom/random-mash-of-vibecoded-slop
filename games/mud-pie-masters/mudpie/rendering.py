@@ -96,11 +96,19 @@ class Painter:
     def text(self, surf, value, pos, size=24, color=INK, bold=False, center=False, max_w=None):
         font = self.font(size, bold)
         phrase = str(value)
-        if max_w:
-            while phrase and font.size(phrase)[0] > max_w:
-                phrase = phrase[:-2]
-            if phrase != str(value):
-                phrase += '…'
+        if max_w is not None:
+            # The ellipsis must be included in the width budget. The previous
+            # fit check measured only the shortened phrase, then appended a
+            # glyph which could bleed outside narrow buttons and labels.
+            limit = max(0, int(max_w))
+            if font.size(phrase)[0] > limit:
+                ellipsis = '…'
+                if font.size(ellipsis)[0] > limit:
+                    phrase = ''
+                else:
+                    while phrase and font.size(phrase + ellipsis)[0] > limit:
+                        phrase = phrase[:-1]
+                    phrase += ellipsis
         label = font.render(phrase, True, color)
         rect = label.get_rect(center=pos) if center else label.get_rect(topleft=pos)
         surf.blit(label, rect)
