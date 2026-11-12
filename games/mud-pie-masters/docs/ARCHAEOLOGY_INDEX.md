@@ -7,6 +7,8 @@
 
 This is a **navigation, provenance and exceptions index**, not a replacement for the already substantive project documents. The imaginary 20-year handoff is a method for skepticism, not the project's real age.
 
+**Visual asset gallery:** [original sprite/expression contact gallery, historic previews and runtime provenance](ASSET_VISUAL_INDEX.md). This links all original tracked images directly without replacing them and distinguishes current judges from legacy judge files.
+
 ## 1. Source-of-truth order and how to avoid duplicate documents
 
 1. **Latest explicit creator decisions** (including later corrections) govern creative direction; proposals from AI agents are not approvals.
