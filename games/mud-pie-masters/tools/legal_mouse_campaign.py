@@ -238,6 +238,20 @@ class CraftPlanner:
         if taper or widen:
             desired = max(190, widen + 3, 190 + taper + 9)
             self.shape_width(0, min(300, desired))
+        # A width/taper gesture conserves mud volume and makes that scoop
+        # thinner. Re-measure the *actual* total height after shaping;
+        # otherwise a recipe can look tall enough in the model oracle but
+        # miss its published height target through legal mouse actions.
+        required_height = self.target("height_min", 0)
+        if self.game.pie.height < required_height:
+            self.bot.key(pygame.K_2)
+            top = len(self.game.pie.layers) - 1
+            start = self.center(top)
+            shortage = required_height - self.game.pie.height + 3
+            dy = -max(8, math.ceil(shortage / .65 * self.game._work_scale()))
+            self.bot.drag(start, (start[0], start[1] + dy))
+            self.bot.require(self.game.pie.height >= required_height,
+                             f"{self.mission.id}: mouse-shaping did not restore height")
         for i in range(int(self.target("workability_min", 0))):
             self.knead(i)
         if self.target("offset_min", 0):
