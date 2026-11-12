@@ -90,7 +90,9 @@ def make_entry(rival: Rival, round_number: int, seed: int,
         if rival.confidence >= 62 and tier.wetness < .71:
             tier.worked = .42
     if player_previous and rival.name == "Daisy" and rng.random() < (.55 if rival.affection>=65 else .3):
-        kinds = list({d.kind for d in player_previous.decorations}) or ["petals"]
+        # Set iteration depends on PYTHONHASHSEED. Canonicalize it so the
+        # same previous pie and RNG seed reproduce Daisy's next entry.
+        kinds = sorted({d.kind for d in player_previous.decorations}) or ["petals"]
         rival.remember("I borrowed a decoration idea from your last pie!")
     else:
         kinds = (["sticks", "pebbles", "leaves", "berries"] if is_bruno else
