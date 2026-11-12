@@ -21,7 +21,9 @@ from mudpie.rendering import Painter
 ])
 def test_ellipsis_and_text_fit_inside_pixel_budget(budget, label):
     pygame.font.init()
-    painter = Painter()
+    # Font-only test: no display or asset loading is needed.
+    painter = Painter.__new__(Painter)
+    painter.fonts = {}
     surf = pygame.Surface((600, 80))
     rect = painter.text(surf, label, (10, 10), size=16, bold=True, max_w=budget)
     assert rect.width <= budget, (label, budget, rect.width)
