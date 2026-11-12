@@ -6,7 +6,7 @@
     "Windows"
   ],
   "version": "0.10.0-dev",
-  "status": "campaign-pacing-and-playtest-report-review",
+  "status": "pre-release-qa",
   "release_status": "pre-release-candidate",
   "offline": true,
   "paid_dependencies": false,
@@ -15,7 +15,7 @@
   "agent_contribution": "ChatGPT GPT-6 / mud-pie-masters / import-v0.5",
   "primary_entrypoint": "main.py",
   "test_command": "python -m pytest -q",
-  "automation_qa": "SDL event-driven Windows/Linux CI, 20 screenshot walkthrough frames per OS",
+  "automation_qa": "26 real Pygame SDL-dummy screenshots/OS in 2026-11-11 main CI run #43121174266",
   "windows_exe_qa": "PyInstaller onedir built on Windows Actions; headless executable smoke verified",
   "full_campaign_qa": "48 Pygame scoring/presentation/save loops with oracle-built test pies; not human playtime",
   "first_human_playtest": "Chapter 1 user feedback in GitHub Issue #9; full two-hour observed human playtest remains open"
