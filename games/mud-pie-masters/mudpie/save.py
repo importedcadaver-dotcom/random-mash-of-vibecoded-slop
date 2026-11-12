@@ -44,11 +44,34 @@ def load_game(path: Path | None = None) -> dict:
             return defaults
         if data.get("version") != VERSION:
             return defaults
-        saved_rivals = [Rival(**r) for r in data.get("rivals", [])]
+        # A damaged optional rival record must not discard otherwise valid
+        # campaign, scrapbook or history. Preserve only complete, typed pairs.
+        saved_rivals = []
+        raw_rivals = data.get("rivals", [])
+        if isinstance(raw_rivals, list):
+            for raw in raw_rivals:
+                if not isinstance(raw, dict):
+                    continue
+                try:
+                    rival = Rival(**raw)
+                except (TypeError, ValueError):
+                    continue
+                numeric = ("affection", "victories", "defeats", "embarrassment",
+                           "confidence", "rivalry")
+                textual = ("name", "personality", "last_signature",
+                           "last_interaction")
+                if (all(type(getattr(rival, key)) is int for key in numeric)
+                        and all(isinstance(getattr(rival, key), str) for key in textual)
+                        and isinstance(rival.memories, list)
+                        and all(isinstance(item, str) for item in rival.memories)):
+                    saved_rivals.append(rival)
         if len(saved_rivals) == 2 and {r.name for r in saved_rivals} == {"Bruno", "Daisy"}:
             defaults["rivals"] = [next(r for r in saved_rivals if r.name == name)
                                    for name in ("Bruno", "Daisy")]
-        defaults["round"] = max(1, min(100000, int(data.get("round", 1))))
+        try:
+            defaults["round"] = max(1, min(100000, int(data.get("round", 1))))
+        except (ValueError, TypeError, OverflowError):
+            pass
         defaults["gallery"] = [entry for entry in data.get("gallery", []) if isinstance(entry, dict)][-60:] if isinstance(data.get("gallery"), list) else []
         defaults["history"] = [entry for entry in data.get("history", []) if isinstance(entry, dict)][-100:] if isinstance(data.get("history"), list) else []
         defaults["campaign"] = normalized_campaign(data.get("campaign"))
