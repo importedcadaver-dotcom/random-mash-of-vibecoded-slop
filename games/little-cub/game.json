@@ -1,0 +1,16 @@
+{
+  "id": "little-cub",
+  "name": "Little Cub — A Tiny Bear Life",
+  "engine": "HTML5 Canvas / JavaScript",
+  "platform": ["Desktop browser", "Mobile browser"],
+  "baseline_version": "0.2",
+  "status": "rebuild-specification",
+  "source_imported": false,
+  "primary_entrypoint": null,
+  "offline": true,
+  "paid_dependencies": false,
+  "automated_baseline_qa": "Mocked JavaScript game-state tests were previously run; not a real browser playtest",
+  "real_browser_playtest_verified": false,
+  "agent_contribution": "ChatGPT GPT-6 / little-cub / rebuild-directive",
+  "workstream_id": "LC-20261114-REBUILD-A"
+}
