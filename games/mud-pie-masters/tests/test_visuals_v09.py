@@ -21,15 +21,16 @@ def app(monkeypatch,tmp_path):
     pygame.quit()
 
 
-def test_legacy_judges_replaced_with_distinct_art_from_sibling_visual_language(app):
-    """Three different forest bear portraits replace the original teddy faces."""
-    for judge in ("petal","boulder","fern"):
-        output=app.paint.images[judge]
-        legacy=pygame.image.load(str(ASSETS/f"{judge}.png")).convert_alpha()
-        assert output.get_size()==legacy.get_size()
-        assert pygame.image.tobytes(output,"RGBA")!=pygame.image.tobytes(legacy,"RGBA")
-        assert output.get_at((0,0)).a==0
-    assert pygame.image.tobytes(app.paint.images["petal"],"RGBA") != pygame.image.tobytes(app.paint.images["fern"],"RGBA")
+def test_judges_use_distinct_authored_portraits(app):
+    portraits = set()
+    for judge in ("petal", "boulder", "fern"):
+        output = app.paint.images[judge]
+        authored = pygame.image.load(str(ASSETS / f"{judge}.png")).convert_alpha()
+        pixels = pygame.image.tobytes(output, "RGBA")
+        assert pixels == pygame.image.tobytes(authored, "RGBA")
+        assert output.get_at((0, 0)).a == 0
+        portraits.add(pixels)
+    assert len(portraits) == 3
 
 
 def test_judge_cards_still_render_at_original_layout_coordinates(app,tmp_path):
