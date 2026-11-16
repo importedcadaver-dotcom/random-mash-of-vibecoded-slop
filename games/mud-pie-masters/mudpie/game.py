@@ -532,7 +532,6 @@ class Game:
     def _sprite(self, name, center, size, bounce=True, expression=None):
         """Draw original expressive cubs or matching forest-judge portraits.
 
-        Judge art is compiled by Painter from matching cub silhouettes.
         Reduced-motion disables idle blinking; hitboxes remain unaffected.
         """
         key = 'player' if name.lower() == 'you' else name.lower()
@@ -678,7 +677,7 @@ class Game:
                 draw_pie(self.canvas,partial,pos+83,480,.28)
                 self._sprite(name,(pos-43,407),(161,193))
             else:
-                self._sprite(name,(pos,400),(210,250))
+                self._sprite(name,(pos,391),(194,230))
             label = 'YOU' if idx == 1 else name.upper()
             self.paint.text(self.canvas,label,(pos,516),27,DARK,bold=True,center=True)
             subtitle = ['Dreams of a HUGE tower','The next mud-pie legend','Loves pretty little details'][idx]
