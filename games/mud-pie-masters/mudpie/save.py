@@ -32,9 +32,9 @@ def save_game(round_number: int, rivals: list[Rival], gallery: list[dict],
 def load_game(path: Path | None = None) -> dict:
     path = path or default_path()
     defaults = {"round": 1, "rivals": make_rivals(), "gallery": [],
-                "history": [], "campaign": initial_campaign(), "settings": {"sound": True, "music": True,
+                "history": [], "campaign": initial_campaign(), "settings": {"sound": False, "music": False,
                                            "reduced_motion": False, "fullscreen": False,
-                                           "sound_volume": 0.55, "music_volume": 0.28,
+                                           "sound_volume": 0.55, "music_volume": 0.15,
                                            "tutorial_seen": False}}
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
