@@ -87,10 +87,9 @@ class Game:
                 if music.exists():
                     pygame.mixer.music.load(str(music))
                     pygame.mixer.music.set_volume(self.settings['music_volume'])
-                    pygame.mixer.music.play(-1)
+                    if self.settings['music']:
+                        pygame.mixer.music.play(-1)
                     self.music_enabled = True
-                    if not self.settings['music']:
-                        pygame.mixer.music.pause()
         except pygame.error:
             self.sound_enabled = False
 
@@ -698,7 +697,7 @@ class Game:
                             (235 if i==0 else 1032,596),13,(114,89,71),center=True)
         for name, x in (('Bruno', 235), ('Daisy', 1032)):
             locked = name in self.sibling_actions
-            self.button((x-150,610,144,25),'CHEER ON ♥',lambda n=name:self.interact_sibling(n,'cheer'),small=True,disabled=locked)
+            self.button((x-150,610,144,25),'CHEER ON',lambda n=name:self.interact_sibling(n,'cheer'),small=True,disabled=locked)
             self.button((x+2,610,144,25),'DARE THEM',lambda n=name:self.interact_sibling(n,'dare'),small=True,disabled=locked)
         self.button((834,640,392,62),'LET’S MAKE A MUD PIE!',self.start_crafting,primary=True)
 
@@ -939,7 +938,7 @@ class Game:
         self.paint.wrap(self.canvas,note,940,477,276,17)
         self.paint.rect(self.canvas,(47,646,250,57),(216,197,155),14,(120,103,76),2,alpha=232)
         self.paint.text(self.canvas,'JUDGING IN PROGRESS',(172,674),16,INK,bold=True,center=True)
-        self.button((915,643,323,59), 'SEE THE NEXT PIE  →' if idx<2 else 'OPEN THE RESULTS  →',
+        self.button((915,643,323,59), 'SEE THE NEXT PIE' if idx<2 else 'OPEN THE RESULTS',
                     self.advance_presentation,primary=True)
         self.paint.text(self.canvas,f'{idx+1} / 3',(790,663),19,INK,bold=True)
 
@@ -1014,9 +1013,9 @@ class Game:
         self.gallery_page=max(0,min(self.gallery_page,pages-1))
         self._heading('Your muddy scrapbook',f'{len(self.gallery)} creations · Page {self.gallery_page+1}/{pages}')
         self.button((1020,20,222,53),'TITLE SCREEN',lambda:setattr(self,'scene','title'))
-        self.button((704,28,135,40),'← NEWER',lambda:self.turn_gallery_page(-1),small=True,
+        self.button((704,28,135,40),'NEWER',lambda:self.turn_gallery_page(-1),small=True,
                     disabled=self.gallery_page==0)
-        self.button((849,28,142,40),'OLDER →',lambda:self.turn_gallery_page(1),small=True,
+        self.button((849,28,142,40),'OLDER',lambda:self.turn_gallery_page(1),small=True,
                     disabled=self.gallery_page>=pages-1)
         if not self.gallery:
             self.paint.rect(self.canvas,(183,212,919,238),CREAM,25,(108,92,67),2,alpha=247)
@@ -1241,9 +1240,9 @@ class Game:
         self.settings[key]=not self.settings[key]
         if key=='music' and self.music_enabled:
             if self.settings[key]:
-                pygame.mixer.music.unpause()
+                pygame.mixer.music.play(-1)
             else:
-                pygame.mixer.music.pause()
+                pygame.mixer.music.stop()
         self.save()
 
     def adjust_volume(self,key,change):

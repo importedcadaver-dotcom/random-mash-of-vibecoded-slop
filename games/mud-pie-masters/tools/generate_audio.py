@@ -53,27 +53,36 @@ def synth_effect(name, duration):
 
 
 def synth_music():
-    duration=12
-    n=duration*RATE
-    # Original four-chord pentatonic lullaby. No recognizable licensed tune.
-    roots=[196,174.61,220,164.81]
-    melody=[392,440,493.88,440,392,349.23,329.63,392,440,392,329.63,293.66,
-            329.63,392,440,493.88,523.25,493.88,440,392,349.23,329.63,293.66,392]
-    notes_per_sec=2
-    data=[]
-    for i in range(n):
-        t=i/RATE
-        chord=min(3,int(t//3))
-        root=roots[chord]
-        beat=int(t*notes_per_sec)
-        phase=(t*notes_per_sec)%1
-        note=melody[beat%len(melody)]
-        pluck=math.exp(-phase*5)*math.sin(2*math.pi*note*t)
-        soft=(math.sin(2*math.pi*root/2*t)+.22*math.sin(2*math.pi*root*t))*.22
-        texture=.07*math.sin(2*math.pi*root*1.5*t)*math.sin(2*math.pi*t*.12)
-        volume=min(1,t/.55,(duration-t)/.55)
-        data.append((.23*pluck+.14*soft+texture)*max(0,volume))
-    save('music',data)
+    beat = 60 / 114
+    samples = [0.0] * round(32 * beat * RATE)
+    melody = [
+        [76, 79, 81, 79, 76], [74, 79, 81, 83, 79],
+        [76, 81, 84, 81, 79], [77, 81, 79, 76, 77],
+        [76, 79, 84, 81, 79], [77, 81, 84, 81, 77],
+        [74, 79, 83, 81, 79], [76, 74, 72, 76, 72],
+    ]
+    chords = [(60,64,67),(67,71,74),(69,72,76),(65,69,72),
+              (60,64,67),(65,69,72),(67,71,74),(60,64,67)]
+
+    def pluck(note, onset, beats, gain):
+        freq = 440 * 2 ** ((note - 69) / 12)
+        start = round(onset * beat * RATE)
+        length = round(beats * beat * RATE)
+        for i in range(min(length, len(samples) - start)):
+            t = i / RATE
+            phase = 2 * math.pi * freq * t
+            envelope = min(1, t / .022, (length-i) / (RATE * .035)) * math.exp(-t * 6)
+            samples[start+i] += gain * envelope * (math.sin(phase) + .15*math.sin(2*phase))
+
+    for bar, (phrase, chord) in enumerate(zip(melody, chords)):
+        for offset, note in zip((0,.75,1.5,2.5,3.25), phrase):
+            pluck(note, bar*4+offset, .7, .22)
+        for offset, note in zip((0,1,2,3), (*chord,chord[1])):
+            pluck(note, bar*4+offset, .87, .12)
+    destination = OUT / 'music.wav'
+    with wave.open(str(destination), 'wb') as track:
+        track.setparams((1, 2, RATE, 0, 'NONE', 'not compressed'))
+        track.writeframes(struct.pack('<' + 'h' * len(samples), *(round(sample * 32767) for sample in samples)))
 
 
 if __name__=='__main__':
